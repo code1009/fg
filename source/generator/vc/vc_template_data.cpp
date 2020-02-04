@@ -12,13 +12,30 @@
 typedef fg::vc_template_data data_t;
 
 //===========================================================================
-//typedef 
+typedef struct _parsing_item_data_vc_item_collection_element_t
+{
+	std::string file  ;
+	std::string filter;
+}
+parsing_item_data_vc_item_collection_element_t;
+
+typedef struct _parsing_t
+{
+	data_t*        data ;
+	tdp_ini_t*     ini  ;
+	tdp_array_t*   array;
+
+	parsing_item_data_vc_item_collection_element_t data_vc_item_collection_element;
+}
+parsing_t;
+
 
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 static void data_vc_item_collection_element_handler (tdp_array_t* ctx)
 {
+	//-----------------------------------------------------------------------
 	tdp_uint_t    element_index;
 	tdp_string_t* element_value;
 
@@ -27,17 +44,12 @@ static void data_vc_item_collection_element_handler (tdp_array_t* ctx)
 	element_value = tdp_array_element_value(ctx);
 
 
-	data_t*      data;
-//	char*        dpointer;
-//	unsigned int dlength;
+	//-----------------------------------------------------------------------
+	parsing_t* parsing;
 
 
-	data = (data_t*)tdp_array_parameter(ctx);
-
-//	dpointer =        data->object.v_array[element_index];
-//	dlength  = sizeof(data->object.v_array[element_index])/sizeof(char);
-
-//	tdp_string_copy_to_c_string(element_value, dpointer, dlength);
+	parsing = (parsing_t*)tdp_array_parameter(ctx);
+	parsing->array = ctx;
 
 
 	//-----------------------------------------------------------------------
@@ -46,11 +58,31 @@ static void data_vc_item_collection_element_handler (tdp_array_t* ctx)
 
 	s.assign((const char*)element_value->begin, element_value->length);
 
-	CX_DEBUG_TRACEF(CX_TWA_ERROR, "%s", s.c_str());
+
+	//-----------------------------------------------------------------------
+	switch (element_index)
+	{
+	case 0u:
+		parsing->data_vc_item_collection_element.file = s;
+		break;
+
+	case 1u:
+		parsing->data_vc_item_collection_element.filter = s;
+		break;
+
+	default:
+		break;
+	}
 }
 
-static void data_vc_item_collection_element (data_t* data, tdp_uint_t index, tdp_string_t* value)
+static void data_vc_item_collection_element (parsing_t* parsing, tdp_uint_t index, tdp_string_t* value)
 {
+	//-----------------------------------------------------------------------
+	parsing->data_vc_item_collection_element.file  .clear();
+	parsing->data_vc_item_collection_element.filter.clear();
+
+
+	//-----------------------------------------------------------------------
 	tdp_array_t  array;
 	tdp_array_t* ctx;
 
@@ -58,7 +90,7 @@ static void data_vc_item_collection_element (data_t* data, tdp_uint_t index, tdp
 	ctx = &array;
 
 	tdp_array_initialize          (ctx);
-	tdp_array_set_parameter       (ctx, data);
+	tdp_array_set_parameter       (ctx, parsing);
 	tdp_array_set_handler_element (ctx, data_vc_item_collection_element_handler);
 	tdp_array_parse               (ctx, value->begin, value->length);
 
@@ -70,11 +102,23 @@ static void data_vc_item_collection_element (data_t* data, tdp_uint_t index, tdp
 			ctx->error_column,
 			ctx->state
 			);
+
+		tdp_ini_set_error(parsing->ini, value->begin);
+
+		return;
 	}
+
+
+	//-----------------------------------------------------------------------
+	parsing->data->_generator->_item_collection.add(
+		parsing->data_vc_item_collection_element.file  , 
+		parsing->data_vc_item_collection_element.filter
+		);
 }
 
 static void data_vc_item_collection_handler (tdp_array_t* ctx)
 {
+	//-----------------------------------------------------------------------
 	tdp_uint_t    element_index;
 	tdp_string_t* element_value;
 
@@ -83,42 +127,22 @@ static void data_vc_item_collection_handler (tdp_array_t* ctx)
 	element_value = tdp_array_element_value(ctx);
 
 
-	data_t*      data;
-//	char*        dpointer;
-//	unsigned int dlength;
-
-
-	data = (data_t*)tdp_array_parameter(ctx);
-
-//	dpointer =        data->object.v_array[element_index];
-//	dlength  = sizeof(data->object.v_array[element_index])/sizeof(char);
-
-//	tdp_string_copy_to_c_string(element_value, dpointer, dlength);
-
-
 	//-----------------------------------------------------------------------
-	/*
-	std::string s;
+	parsing_t* parsing;
 
 
-	s.assign((const char*)element_value->begin, element_value->length);
-	*/
+	parsing = (parsing_t*)tdp_array_parameter(ctx);
+	parsing->array = ctx;
 
 
 	//-----------------------------------------------------------------------
 	tdp_string_trim_braces(element_value);
 
 
-	data_vc_item_collection_element (data, element_index, element_value);
+	data_vc_item_collection_element (parsing, element_index, element_value);
 }
 
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-//===========================================================================
-static void data_vc_item_collection (tdp_ini_t* ini, tdp_string_t* value)
+static void data_vc_item_collection (parsing_t* parsing, tdp_string_t* value)
 {
 	tdp_array_t  array;
 	tdp_array_t* ctx;
@@ -127,7 +151,7 @@ static void data_vc_item_collection (tdp_ini_t* ini, tdp_string_t* value)
 	ctx = &array;
 
 	tdp_array_initialize          (ctx);
-	tdp_array_set_parameter       (ctx, ini->parameter);
+	tdp_array_set_parameter       (ctx, parsing);
 	tdp_array_set_handler_element (ctx, data_vc_item_collection_handler);
 	tdp_array_parse               (ctx, value->begin, value->length);
 
@@ -140,19 +164,26 @@ static void data_vc_item_collection (tdp_ini_t* ini, tdp_string_t* value)
 			ctx->state
 			);
 
-		tdp_ini_set_error(ini, value->begin);
+		tdp_ini_set_error(parsing->ini, value->begin);
+
+		return;
 	}
 }
 
-static void data_vc_item (tdp_ini_t* ini)
+static void data_vc_item (parsing_t* parsing)
 {
+	//-----------------------------------------------------------------------
 	tdp_string_t* value;
 
 
-	value = tdp_ini_value (ini);
+	value = tdp_ini_value (parsing->ini);
 
 
-	if (TDP_TRUE==tdp_ini_is_variable (ini, "collection" )){data_vc_item_collection(ini, value);}
+	//-----------------------------------------------------------------------
+	if (TDP_TRUE==tdp_ini_is_variable (parsing->ini, "collection" ))
+	{
+		data_vc_item_collection(parsing, value);
+	}
 }
 
 
@@ -163,9 +194,17 @@ static void data_vc_item (tdp_ini_t* ini)
 //===========================================================================
 static void data_vc_handler (tdp_ini_t* ctx)
 {
+	//-----------------------------------------------------------------------
+	parsing_t* parsing;
+
+
+	parsing = (parsing_t*)tdp_ini_parameter(ctx);
+
+
+	//-----------------------------------------------------------------------
 	if (TDP_TRUE==tdp_ini_is_section(ctx, "item"))
 	{
-		data_vc_item(ctx);
+		data_vc_item(parsing);
 	}
 }
 
@@ -175,22 +214,43 @@ static void data_vc_handler (tdp_ini_t* ctx)
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-static void data_handler (tdp_ini_t* ctx)
+static void data_generater (parsing_t* parsing)
 {
+	//-----------------------------------------------------------------------
 	tdp_string_t* value;
 
 
-	value = tdp_ini_value (ctx);
-	if (TDP_TRUE==tdp_ini_is_section_variable(ctx, "generator", "type"))
+	value = tdp_ini_value (parsing->ini);
+
+
+	//-----------------------------------------------------------------------
+	if (TDP_TRUE==tdp_ini_is_variable(parsing->ini, "type"))
 	{
 		if (TDP_TRUE==tdp_string_compare(value, "vc", TDP_TRUE))
 		{
-			tdp_ini_set_handler_element (ctx, data_vc_handler);
+			tdp_ini_set_handler_element (parsing->ini, data_vc_handler);
 		}
 		else
 		{
-			tdp_ini_set_error(ctx, value->begin);
+			tdp_ini_set_error(parsing->ini, value->begin);
 		}
+	}
+}
+
+static void data_handler (tdp_ini_t* ctx)
+{
+	//-----------------------------------------------------------------------
+	parsing_t* parsing;
+
+
+	parsing = (parsing_t*)tdp_ini_parameter(ctx);
+	parsing->ini = ctx;
+
+
+	//-----------------------------------------------------------------------
+	if (TDP_TRUE==tdp_ini_is_section(ctx, "generator"))
+	{
+		data_generater(parsing);
 	}
 }
 
@@ -202,6 +262,16 @@ static void data_handler (tdp_ini_t* ctx)
 //===========================================================================
 static cx::bool_t load_data(data_t* data, tdp_char_t* spointer, tdp_uint_t slength)
 {
+	//-----------------------------------------------------------------------
+	parsing_t parsing;
+
+	
+	parsing.data  = data;
+	parsing.ini   = CX_NULL_POINTER;
+	parsing.array = CX_NULL_POINTER;
+
+
+	//-----------------------------------------------------------------------
 	tdp_ini_t  ini;
 	tdp_ini_t* ctx;
 
@@ -209,7 +279,7 @@ static cx::bool_t load_data(data_t* data, tdp_char_t* spointer, tdp_uint_t sleng
 	ctx = &ini;
 
 	tdp_ini_initialize          (ctx);
-	tdp_ini_set_parameter       (ctx, data);
+	tdp_ini_set_parameter       (ctx, &parsing);
 	tdp_ini_set_handler_element (ctx, data_handler);
 	tdp_ini_parse               (ctx, spointer, slength);
  	if (ctx->state != TDP_INI_STATE_DONE)
