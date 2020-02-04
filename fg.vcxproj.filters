@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{993FF6BF-7FE2-4BD0-81C2-C5CC709373EB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\res">
+      <UniqueIdentifier>{4B8CD831-9304-4CA3-AEC6-4CA8B7713707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\res\wxx">
+      <UniqueIdentifier>{A9EDFDDF-EF06-4E2C-AEE4-FF3FE5095B05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\generator">
+      <UniqueIdentifier>{1f0acb17-f17d-40de-8ea2-bf353a33a833}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\generator\vc">
+      <UniqueIdentifier>{859fb5aa-a748-43e8-a027-a8eeac9a4719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\tdp">
+      <UniqueIdentifier>{882887b9-2fc3-4563-9655-82a68dde4014}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source/Application.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/MyWinApp.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/MainFrame.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/MyTabbedMDI.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/MyDocker.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/EventMessageDocker.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/MyView.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source/stdafx.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\generator.cpp">
+      <Filter>source\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\guid.cpp">
+      <Filter>source\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\parameter.cpp">
+      <Filter>source\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\file_copy_generator.cpp">
+      <Filter>source\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_project_generator.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_generator.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_item.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\text.cpp">
+      <Filter>source\generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_project_filter_generator.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_solution_generator.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_ini.c">
+      <Filter>source\tdp</Filter>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_string.c">
+      <Filter>source\tdp</Filter>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_array.c">
+      <Filter>source\tdp</Filter>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_template_data.cpp">
+      <Filter>source\generator\vc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source/Application.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/MyWinApp.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/MainFrame.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/MyTabbedMDI.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/MyDocker.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/EventMessageDocker.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/MyView.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/stdafx.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/targetver.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/wxx.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source/res/Resource.h">
+      <Filter>source\res</Filter>
+    </ClInclude>
+    <ClInclude Include="source/res/wxx/wxx_resource.h">
+      <Filter>source\res\wxx</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\generator.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\header.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\parameter.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\guid.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\file_copy_generator.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_generator.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_project_generator.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\delete_pointer.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_item.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\text.hpp">
+      <Filter>source\generator</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_project_filter_generator.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_solution_generator.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tdp\tdp_ini.h">
+      <Filter>source\tdp</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tdp\tdp_string.h">
+      <Filter>source\tdp</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tdp\tdp.h">
+      <Filter>source\tdp</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tdp\tdp_array.h">
+      <Filter>source\tdp</Filter>
+    </ClInclude>
+    <ClInclude Include="source\generator\vc\vc_template_data.hpp">
+      <Filter>source\generator\vc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="source/res/Application.rc">
+      <Filter>source\res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="source/res/Application.ico">
+      <Filter>source\res</Filter>
+    </Image>
+    <Image Include="source/res/Toolbar.bmp">
+      <Filter>source\res</Filter>
+    </Image>
+    <Image Include="source/res/Docker.ico">
+      <Filter>source\res</Filter>
+    </Image>
+    <Image Include="source/res/View.ico">
+      <Filter>source\res</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDbottom.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDcenter.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDleft.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDmiddle.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDright.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+    <Image Include="source/res/wxx/SDtop.bmp">
+      <Filter>source\res\wxx</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source/ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="source/res/Application.manifest">
+      <Filter>source\res</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source/res/wxx/SplitH.cur">
+      <Filter>source\res\wxx</Filter>
+    </None>
+    <None Include="source/res/wxx/SplitV.cur">
+      <Filter>source\res\wxx</Filter>
+    </None>
+  </ItemGroup>
+</Project>

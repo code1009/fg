@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2E811FAE-E82C-4C0B-B226-B9F07FEF9A05}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)output\object\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(SolutionDir)output\object\$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:/Development/SDK/cxLibrary;D:/Development/SDK/cxLibrary/Win32xx/870/include;</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>D:\Development\SDK\cxLibrary\cx3\build_msvc2013_static_library\Debug</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:/Development/SDK/cxLibrary/Win32xx/870/include</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="source/Application.cpp" />
+    <ClCompile Include="source/MyWinApp.cpp" />
+    <ClCompile Include="source/MainFrame.cpp" />
+    <ClCompile Include="source/MyTabbedMDI.cpp" />
+    <ClCompile Include="source/MyDocker.cpp" />
+    <ClCompile Include="source/EventMessageDocker.cpp" />
+    <ClCompile Include="source/MyView.cpp" />
+    <ClCompile Include="source/stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\file_copy_generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\guid.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\parameter.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\text.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_template_data.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_item.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_project_filter_generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_project_generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\generator\vc\vc_solution_generator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_array.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_ini.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="source\tdp\tdp_string.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source/Application.hpp" />
+    <ClInclude Include="source/MyWinApp.hpp" />
+    <ClInclude Include="source/MainFrame.hpp" />
+    <ClInclude Include="source/MyTabbedMDI.hpp" />
+    <ClInclude Include="source/MyDocker.hpp" />
+    <ClInclude Include="source/EventMessageDocker.hpp" />
+    <ClInclude Include="source/MyView.hpp" />
+    <ClInclude Include="source/stdafx.h" />
+    <ClInclude Include="source/targetver.h" />
+    <ClInclude Include="source/wxx.hpp" />
+    <ClInclude Include="source/res/Resource.h" />
+    <ClInclude Include="source/res/wxx/wxx_resource.h" />
+    <ClInclude Include="source\generator\delete_pointer.hpp" />
+    <ClInclude Include="source\generator\file_copy_generator.hpp" />
+    <ClInclude Include="source\generator\generator.hpp" />
+    <ClInclude Include="source\generator\guid.hpp" />
+    <ClInclude Include="source\generator\header.hpp" />
+    <ClInclude Include="source\generator\parameter.hpp" />
+    <ClInclude Include="source\generator\text.hpp" />
+    <ClInclude Include="source\generator\vc\vc_generator.hpp" />
+    <ClInclude Include="source\generator\vc\vc_template_data.hpp" />
+    <ClInclude Include="source\generator\vc\vc_item.hpp" />
+    <ClInclude Include="source\generator\vc\vc_project_filter_generator.hpp" />
+    <ClInclude Include="source\generator\vc\vc_project_generator.hpp" />
+    <ClInclude Include="source\generator\vc\vc_solution_generator.hpp" />
+    <ClInclude Include="source\tdp\tdp.h" />
+    <ClInclude Include="source\tdp\tdp_array.h" />
+    <ClInclude Include="source\tdp\tdp_ini.h" />
+    <ClInclude Include="source\tdp\tdp_string.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="source/res/Application.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="source/res/Application.ico" />
+    <Image Include="source/res/Toolbar.bmp" />
+    <Image Include="source/res/Docker.ico" />
+    <Image Include="source/res/View.ico" />
+    <Image Include="source/res/wxx/SDbottom.bmp" />
+    <Image Include="source/res/wxx/SDcenter.bmp" />
+    <Image Include="source/res/wxx/SDleft.bmp" />
+    <Image Include="source/res/wxx/SDmiddle.bmp" />
+    <Image Include="source/res/wxx/SDright.bmp" />
+    <Image Include="source/res/wxx/SDtop.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="source/ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="source/res/Application.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source/res/wxx/SplitH.cur" />
+    <None Include="source/res/wxx/SplitV.cur" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
