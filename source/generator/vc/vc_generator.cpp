@@ -59,20 +59,10 @@ cx::bool_t vc_generator::generate (void)
 void vc_generator::initialize (void)
 {
 	//-----------------------------------------------------------------------
-	std::string splash;
-	std::string backsplash;
-
-
-	splash    = "/";
-	backsplash= "\\";
-
-
-	//-----------------------------------------------------------------------
 	std::string my_directory;
 
 
-	my_directory = cx::get_directory_of_current_process();
-	my_directory = cx::replace(my_directory, backsplash, splash);
+	my_directory = get_parameter()->environment("$fg_directory");
 
 
 	//-----------------------------------------------------------------------
@@ -110,6 +100,9 @@ void vc_generator::initialize (void)
 	_item_collection.add("source/wxx.hpp"                  , "source"          );
 	_item_collection.add("source/Application.hpp"          , "source"          );
 	_item_collection.add("source/Application.cpp"          , "source"          );
+	_item_collection.add("source/my_debug.hpp"             , "source"          );
+	_item_collection.add("source/my_debug.cpp"             , "source"          );
+	_item_collection.add("source/Declaration.hpp"          , "source"          );
 	_item_collection.add("source/MyWinApp.hpp"             , "source"          );
 	_item_collection.add("source/MyWinApp.cpp"             , "source"          );
 	_item_collection.add("source/MainFrame.hpp"            , "source"          );
@@ -123,6 +116,7 @@ void vc_generator::initialize (void)
 	_item_collection.add("source/MyView.hpp"               , "source"          );
 	_item_collection.add("source/MyView.cpp"               , "source"          );
 */
+	_project_generator       ._template_data   = &_template_data;
 
 	_project_generator       ._item_collection = &_item_collection;
 	_project_filter_generator._item_collection = &_item_collection;
@@ -205,8 +199,24 @@ cx::bool_t vc_generator::generate_project (void)
 
 
 	//-----------------------------------------------------------------------
+/*
 	_project_generator.add_configuration ("Debug"  , "Win32", true );
 	_project_generator.add_configuration ("Release", "Win32", false);
+*/
+	std::vector<vc_template_data_project_configuration*>::iterator i;
+	
+	vc_template_data_project_configuration* e;
+
+	
+	for (i =_template_data._project_configuration_container.begin();
+	     i!=_template_data._project_configuration_container.end();
+	     i++
+	    )
+	{
+		e = *i;
+
+		_project_generator.add_configuration (e->_configuration, e->_platform, e->_debug);
+	}
 
 
 	//-----------------------------------------------------------------------

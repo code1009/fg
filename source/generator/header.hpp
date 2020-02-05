@@ -24,11 +24,11 @@
 
 #include "file_copy_generator.hpp"
 
+#include "vc/vc_template_data.hpp"
 #include "vc/vc_item.hpp"
 #include "vc/vc_project_filter_generator.hpp"
 #include "vc/vc_project_generator.hpp"
 #include "vc/vc_solution_generator.hpp"
-#include "vc/vc_template_data.hpp"
 #include "vc/vc_generator.hpp"
 
 

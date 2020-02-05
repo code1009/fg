@@ -1,8 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 #include "stdafx.h"
-#include "generator/header.hpp"
 #include "Application.hpp"
+
+#include "generator/header.hpp"
 
 
 
@@ -53,10 +54,10 @@ void CMainFrame::LoadDefaultDockers()
 
 	
 	// Add the parent dockers
-	pDockLeft = AddDockedChild(new CMyDocker (), DS_DOCKED_LEFT | style, 100, ID_DOCKER_MY );
+	pDockLeft = AddDockedChild(new CMyDocker (), DS_DOCKED_LEFT | style, 400, ID_DOCKER_MY );
 
 	// Add the remaining dockers
-	pDockLeft->AddDockedChild(new CEventMessageDocker (), DS_DOCKED_CONTAINER | style, 100, ID_DOCKER_EVENTMESSAGE );
+	pDockLeft->AddDockedChild(new CEventMessageDocker (), DS_DOCKED_CONTAINER | style, 400, ID_DOCKER_EVENTMESSAGE );
 }
 
 void CMainFrame::LoadDefaultMDIs()
@@ -64,8 +65,7 @@ void CMainFrame::LoadDefaultMDIs()
 	m_MyTabbedMDI.GetTab().SetPadding(200,100);
 	
 	// Add some MDI tabs
-	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView"       ) , ID_MDI_VIEW_MY );
-	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView     xx") , ID_MDI_VIEW_MY );
+	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView") , ID_MDI_VIEW_MY );
 
 
 	if (m_MyTabbedMDI.IsWindow())
@@ -200,11 +200,6 @@ BOOL CMainFrame::OnFileNew()
 		m_MyTabbedMDI.SetActiveMDITab(0);
 	}
 
-	return TRUE;
-}
-
-BOOL CMainFrame::OnFileGenerate()
-{
 	fg::generate("");
 
 	return TRUE;
@@ -465,8 +460,6 @@ BOOL CMainFrame::OnCommand(WPARAM wparam, LPARAM lparam)
 	case IDM_TABBEDMDI_TOP:     return OnMDITabsAtTop();
 
 	case IDM_FILE_NEW:          return OnFileNew();
-	case IDM_FILE_GENERATE:     return OnFileGenerate();
-
 	case IDM_FILE_EXIT:         return OnFileExit();
 
 	case IDM_HELP_ABOUT:        return OnHelp();

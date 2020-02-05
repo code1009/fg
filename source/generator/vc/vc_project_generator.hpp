@@ -41,6 +41,9 @@ public:
 	vc_item_collection*                    _item_collection;
 
 public:
+	vc_template_data* _template_data;
+
+public:
 	vc_project_generator();
 	virtual ~vc_project_generator();
 
@@ -108,7 +111,7 @@ public:
 	void TAG_ItemGroup_GROUP                    (void);
 	void TAG_ItemGroup                          (std::string item_type);
 	void TAG_ItemGroup_SUBTAG                   (vc_item* item);
-	void TAG_ItemGroup_SUBTAG_ClCompile_PCH     (vc_item* item);
+	void TAG_ItemGroup_SUBTAG_ClCompile_PCH     (vc_item* item, std::string value);
 	void TAG_ItemGroup_SUBTAG_CustomBuild_Ribbon(vc_item* item);
 };
 

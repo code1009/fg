@@ -53,6 +53,8 @@ vc_project_generator::vc_project_generator():
 	generator()
 {
 	_item_collection = CX_NULL_POINTER;
+	
+	_template_data = CX_NULL_POINTER;
 }
 
 vc_project_generator::~vc_project_generator()
@@ -211,7 +213,6 @@ void vc_project_generator::TAG_ItemGroup_ATTR_Label_ProjectConfigurations_SUBTAG
 }
 
 //===========================================================================
-// TODO:
 void vc_project_generator::TAG_PropertyGroup_ATTR_Label_Globals (void)
 {
 	_oss 
@@ -290,24 +291,62 @@ void vc_project_generator::TAG_PropertyGroup_ATTR_Label_Configuration (vc_projec
 // TODO:
 void vc_project_generator::TAG_PropertyGroup_ATTR_Label_Configuration_SUB (vc_project_configuration* e)
 {
-	std::string ConfigurationType_Application = "Application";
-	std::string UseDebugLibraries_true        = "true";
-	std::string UseDebugLibraries_false       = "false";
-	std::string PlatformToolset_v120          = "v120";
-	std::string CharacterSet_Unicode          = "Unicode";
-	std::string CharacterSet_MultiByte        = "MultiByte";
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
 
 
-	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("ConfigurationType", ConfigurationType_Application);
-	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("UseDebugLibraries", e->_debug ? UseDebugLibraries_true : UseDebugLibraries_false );
-	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("PlatformToolset"  , PlatformToolset_v120         );
-
-	if (!e->_debug)
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
 	{
-		TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("WholeProgramOptimization"  , "true");
+		c = p->find_entry("/property/configuration");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
 	}
 
-	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("CharacterSet"     , CharacterSet_MultiByte       );
+
+	//--------------------------------------------------------------------------
+	std::string ConfigurationType       ;
+	std::string UseDebugLibraries       ;
+	std::string PlatformToolset         ;
+	std::string WholeProgramOptimization;
+	std::string CharacterSet            ;
+
+
+	ConfigurationType        = "Application"               ;
+	UseDebugLibraries        = e->_debug ? "true" : "false";
+	PlatformToolset          = "v120"                      ; // "v120" or "v120_xp"
+	WholeProgramOptimization = "true"                      ;
+	CharacterSet             = "MultiByte"                 ; // "MultiByte" or "Unicode";
+
+	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("ConfigurationType", ConfigurationType);
+	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("UseDebugLibraries", UseDebugLibraries);
+	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("PlatformToolset"  , PlatformToolset  );
+	if (!e->_debug)
+	{
+		TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("WholeProgramOptimization", WholeProgramOptimization);
+	}
+	TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG("CharacterSet"     , CharacterSet    );
 }
 
 void vc_project_generator::TAG_PropertyGroup_ATTR_Label_Configuration_SUBTAG (std::string name, std::string value)
@@ -447,22 +486,56 @@ void vc_project_generator::TAG_PropertyGroup (vc_project_configuration* e)
 		<< eline();
 }
 
+// TODO:
 void vc_project_generator::TAG_PropertyGroup_SUB (vc_project_configuration* e)
 {
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
+
+
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
+	{
+		c = p->find_entry("/property");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_PropertyGroup_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
+	}
+
+
+	//--------------------------------------------------------------------------
 	std::string IntDir;
 	std::string OutDir;
-
-	std::string LinkIncremental_true  = "true";
-	std::string LinkIncremental_false = "false";
+	std::string LinkIncremental;
 
 
-	IntDir ="$(SolutionDir)output\\object\\$(Configuration)\\$(ProjectName)\\";
-	OutDir ="$(SolutionDir)output\\$(Configuration)\\";
-
+	IntDir          ="$(SolutionDir)output\\object\\$(Configuration)\\$(ProjectName)\\";
+	OutDir          ="$(SolutionDir)output\\$(Configuration)\\";
+	LinkIncremental = e->_debug ? "true" : "false";
 
 	TAG_PropertyGroup_SUBTAG("IntDir"         , IntDir);
 	TAG_PropertyGroup_SUBTAG("OutDir"         , OutDir);
-	TAG_PropertyGroup_SUBTAG("LinkIncremental", e->_debug ? LinkIncremental_true : LinkIncremental_false);
+	TAG_PropertyGroup_SUBTAG("LinkIncremental", LinkIncremental);
 }
 
 void vc_project_generator::TAG_PropertyGroup_SUBTAG (std::string name, std::string value)
@@ -515,7 +588,6 @@ void vc_project_generator::TAG_ItemDefinitionGroup (vc_project_configuration* e)
 		<< eline();
 }
 
-// TODO:
 void vc_project_generator::TAG_ItemDefinitionGroup_SUB (vc_project_configuration* e)
 {
 	TAG_ItemDefinitionGroup_SUBTAG (e, "ClCompile"      );
@@ -562,8 +634,43 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG (std::strin
 	}
 }
 
+// TODO:
 void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_ClCompile (vc_project_configuration* e)
 {
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
+
+
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
+	{
+		c = p->find_entry("/compile");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
+	}
+
+
 	//-----------------------------------------------------------------------
 	std::string WarningLevel           ;
 	std::string PrecompiledHeader      ;
@@ -645,12 +752,47 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_ClCompile (vc_project_
 
 void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_Link (vc_project_configuration* e)
 {
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
+
+
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
+	{
+		c = p->find_entry("/link");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
+	}
+
+
+	//-----------------------------------------------------------------------
 	std::string AdditionalLibraryDirectories;
 
 
 	if (e->_debug)
 	{
-		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx3/build_msvc2013_static_library/Debug";
+		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx3/build_msvc2013_static_library/Debug;D:/Development/SDK/cxLibrary/Visual Leak Detector/2.5.1/lib/Win32";
 
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("SubSystem"                    , "Windows" );
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("GenerateDebugInformation"     , "true"    );
@@ -670,6 +812,41 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_Link (vc_project_confi
 
 void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_ResourceCompile (vc_project_configuration* e)
 {
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
+
+
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
+	{
+		c = p->find_entry("/compile-res");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
+	}
+
+
+	//-----------------------------------------------------------------------
 	std::string Culture                      ;
 	std::string AdditionalIncludeDirectories ;
 	std::string PreprocessorDefinitions      ;
@@ -702,6 +879,41 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_ResourceCompile (vc_pr
 
 void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_Midl (vc_project_configuration* e)
 {
+	//--------------------------------------------------------------------------
+	vc_template_data_project_configuration* p;
+	vc_template_data_entry_collection*      c;
+
+
+	p = _template_data->find_project_configuration(e->get_name());
+	if (CX_NULL_POINTER!=p)
+	{
+		c = p->find_entry("/compile-midl");
+
+		if (CX_NULL_POINTER!=c)
+		{
+			if (!c->_contanier.empty())
+			{
+				std::vector<vc_template_data_entry*>::iterator i;
+			
+				vc_template_data_entry* e;
+
+
+				for (i =c->_contanier.begin();
+					 i!=c->_contanier.end();
+					 i++)
+				{
+					e = *i;
+
+					TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG(e->_variable, e->_value);
+				}
+
+				return;
+			}
+		}
+	}
+
+
+	//-----------------------------------------------------------------------
 	std::string MkTypLibCompatible     ;
 	std::string TargetEnvironment      ;
 	std::string PreprocessorDefinitions;
@@ -820,9 +1032,13 @@ void vc_project_generator::TAG_ItemGroup_SUBTAG(vc_item* item)
 
 		if      (item->_type=="ClCompile")
 		{
-			if (item->_option=="ClCompile_PCH")
+			if (item->_option=="ClCompile_PCHCreate")
 			{
-				TAG_ItemGroup_SUBTAG_ClCompile_PCH(item);
+				TAG_ItemGroup_SUBTAG_ClCompile_PCH(item, "Create");
+			}
+			if (item->_option=="ClCompile_PCHNotUsing")
+			{
+				TAG_ItemGroup_SUBTAG_ClCompile_PCH(item, "NotUsing");
 			}
 		}
 		else if (item->_type=="CustomBuild")
@@ -835,7 +1051,7 @@ void vc_project_generator::TAG_ItemGroup_SUBTAG(vc_item* item)
 	}
 }
 
-void vc_project_generator::TAG_ItemGroup_SUBTAG_ClCompile_PCH(vc_item* item)
+void vc_project_generator::TAG_ItemGroup_SUBTAG_ClCompile_PCH(vc_item* item, std::string value)
 {
 	//--------------------------------------------------------------------------
 	_oss << ispace2(2) 
@@ -870,7 +1086,7 @@ void vc_project_generator::TAG_ItemGroup_SUBTAG_ClCompile_PCH(vc_item* item)
 			<< "<PrecompiledHeader" 
 			<< " Condition="  << "\"" << Condition << "==" << squot(ProjectConfiguration) << "\"" 
 			<< ">" 
-			<< "Create"
+			<< value
 			<< "</PrecompiledHeader>"
 			<< eline();
 	}

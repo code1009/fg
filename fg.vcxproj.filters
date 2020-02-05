@@ -87,6 +87,9 @@
     <ClCompile Include="source\generator\vc\vc_template_data.cpp">
       <Filter>source\generator\vc</Filter>
     </ClCompile>
+    <ClCompile Include="source\my_debug.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source/Application.hpp">
@@ -175,6 +178,12 @@
     </ClInclude>
     <ClInclude Include="source\generator\vc\vc_template_data.hpp">
       <Filter>source\generator\vc</Filter>
+    </ClInclude>
+    <ClInclude Include="source\my_debug.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Declaration.hpp">
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -37,8 +37,7 @@ cx::bool_t file_copy_generator::generate (void)
 	std::string my_directory;
 
 
-	my_directory = cx::get_directory_of_current_process();
-	my_directory = cx::replace(my_directory, backsplash, splash);
+	my_directory = get_parameter()->environment("$fg_directory");
 
 
 	//-----------------------------------------------------------------------

@@ -23,7 +23,7 @@ static void delete_array_pointer (POINTER_TYPE p)
 }
 
 template <typename FIRST, typename SECOND_POINTER_TYPE>
-static void delete_pair_second_pointer(std::pair<typename FIRST, typename SECOND_POINTER_TYPE>& p)
+static void delete_pair_second_pointer(std::pair<typename FIRST, typename SECOND_POINTER_TYPE> p)
 {
 	delete p.second;
 }

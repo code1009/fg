@@ -117,13 +117,34 @@ static std::string get_vc_item_type (std::string file_path)
 	return None;
 }
 
-static cx::bool_t is_vc_item_ClCompile_PrecompiledHeader (std::string file_path)
+static cx::bool_t is_vc_item_ClCompile_PrecompiledHeader_Create (std::string file_path)
 {
 	std::string filter;
 	std::string item;
 
 
 	filter = "stdafx.cpp";
+	item   = cx::get_file_of_file_path(file_path);
+
+	cx::to_upper(filter);
+	cx::to_upper(item);
+
+	if ( filter == item )
+	{
+		return true;
+	}
+
+
+	return false;
+}
+
+static cx::bool_t is_vc_item_ClCompile_PrecompiledHeader_NotUsing (std::string file_path)
+{
+	std::string filter;
+	std::string item;
+
+
+	filter = "my_debug.cpp";
 	item   = cx::get_file_of_file_path(file_path);
 
 	cx::to_upper(filter);
@@ -213,9 +234,13 @@ void vc_item_collection::add (std::string file_path, std::string filter)
 	item->_filter    = filter;
 	item->_type      = get_vc_item_type(file_path);
 
-	if ( is_vc_item_ClCompile_PrecompiledHeader(file_path) )
+	if ( is_vc_item_ClCompile_PrecompiledHeader_Create(file_path) )
 	{
-		item->_option = "ClCompile_PCH";
+		item->_option = "ClCompile_PCHCreate";
+	}
+	if ( is_vc_item_ClCompile_PrecompiledHeader_NotUsing(file_path) )
+	{
+		item->_option = "ClCompile_PCHNotUsing";
 	}
 	if ( is_vc_item_CustomBuild_Ribbon(file_path) )
 	{
