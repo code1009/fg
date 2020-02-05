@@ -20,6 +20,8 @@ public:
 	virtual LRESULT WndProc(UINT msg, WPARAM wparam, LPARAM lparam);
 	virtual LRESULT OnNotifyReflect(WPARAM wparam, LPARAM lparam);
 
+	virtual LRESULT OnMessageReflect(UINT msg, WPARAM wparam, LPARAM lparam);
+
 private:
 	LRESULT OnLvnGetDispInfo   (WPARAM wparam, LPARAM lparam);
 	LRESULT OnLvnBeginLabelEdit(WPARAM wparam, LPARAM lparam);
@@ -33,6 +35,19 @@ private:
 	LRESULT OnItemPreErase(WPARAM wparam, LPARAM lparam);
 	LRESULT OnItemPostErase(WPARAM wparam, LPARAM lparam);
 	LRESULT OnSubItemPrePaint(WPARAM wparam, LPARAM lparam);
+
+private:
+	LRESULT OnMeasureItem(WPARAM wparam, LPARAM lparam);
+	LRESULT OnDrawItem(WPARAM wparam, LPARAM lparam);
+	LRESULT OnDeleteItem(WPARAM wparam, LPARAM lparam);
+	LRESULT OnCompareItem(WPARAM wparam, LPARAM lparam);
+
+	void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
+	void MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
+	int CompareItem(LPCOMPAREITEMSTRUCT /*lpCompareItemStruct*/);
+	void DeleteItem(LPDELETEITEMSTRUCT /*lpDeleteItemStruct*/);
+
+	void GetCellRect(int header_column, const CRect& item_rect, CRect& cell_rect);
 
 private:
 	CImageList m_SmallImageList;

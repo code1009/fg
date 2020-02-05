@@ -23,7 +23,8 @@ void CEventMessageDockerWnd::PreCreate(CREATESTRUCT& cs)
 
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 
-	cs.style |= (LVS_OWNERDATA);
+//	cs.style |= (LVS_OWNERDRAWFIXED);
+	cs.style |= (LVS_OWNERDATA|LVS_OWNERDRAWFIXED);
 //	cs.style |= (LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA);
 }
 
@@ -48,6 +49,7 @@ void CEventMessageDockerWnd::OnAttach()
 		LVS_REPORT        | 
 		LVS_SHOWSELALWAYS | 
 		LVS_OWNERDATA     |
+		LVS_OWNERDRAWFIXED|
 		0u;
 
 	dwExtendedStyle = 
@@ -121,6 +123,17 @@ LRESULT CEventMessageDockerWnd::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
 	switch (msg)
 	{
 	case WM_MOUSEACTIVATE:  return OnMouseActivate(msg, wparam, lparam);
+
+	case WM_DRAWITEM:    return OnDrawItem(wparam, lparam);
+	case WM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
+	case WM_COMPAREITEM: return OnCompareItem(wparam, lparam);
+	case WM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
+/*
+	case OCM_DRAWITEM:    return OnDrawItem(wparam, lparam);
+	case OCM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
+	case OCM_COMPAREITEM: return OnCompareItem(wparam, lparam);
+	case OCM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
+*/
 	}
 
 	return WndProcDefault(msg, wparam, lparam);
@@ -255,6 +268,180 @@ LRESULT CEventMessageDockerWnd::OnSubItemPrePaint(WPARAM wparam, LPARAM lparam)
 	return CDRF_DODEFAULT;
 }
 
+//---------------------------------------------------------------------------
+LRESULT CEventMessageDockerWnd::OnMessageReflect(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	switch (msg)
+	{
+	case WM_DRAWITEM:    return OnDrawItem(wparam, lparam);
+	case WM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
+	case WM_COMPAREITEM: return OnCompareItem(wparam, lparam);
+	case WM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
+/*
+	case OCM_DRAWITEM:    return OnDrawItem(wparam, lparam);
+	case OCM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
+	case OCM_COMPAREITEM: return OnCompareItem(wparam, lparam);
+	case OCM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
+*/
+	}
+
+	return CListView::OnMessageReflect(msg, wparam, lparam);
+}
+
+LRESULT CEventMessageDockerWnd::OnDrawItem(WPARAM wparam, LPARAM lparam)
+{
+	DrawItem((LPDRAWITEMSTRUCT)lparam);
+
+	return (LRESULT)TRUE;
+}
+
+LRESULT CEventMessageDockerWnd::OnMeasureItem(WPARAM wparam, LPARAM lparam)
+{
+	MeasureItem((LPMEASUREITEMSTRUCT)lparam);
+
+	return (LRESULT)TRUE;
+}
+
+LRESULT CEventMessageDockerWnd::OnCompareItem(WPARAM wparam, LPARAM lparam)
+{
+	return CompareItem((LPCOMPAREITEMSTRUCT)lparam);
+}
+
+LRESULT CEventMessageDockerWnd::OnDeleteItem(WPARAM wparam, LPARAM lparam)
+{
+	DeleteItem((LPDELETEITEMSTRUCT)lparam);
+
+	return (LRESULT)TRUE;
+}
+
+//---------------------------------------------------------------------------
+void CEventMessageDockerWnd::GetCellRect(int header_column, const CRect& item_rect, CRect& cell_rect)
+{
+	CHeader header;
+	
+	header.Attach(GetHeader());
+
+	CRect header_rect;
+	header_rect = header.GetItemRect(header_column);
+
+	// If we don't do this, when we scroll to the right, we will be 
+	// drawing as if we weren't and your cells won't line up with the
+	// columns.
+	int x_offset = -GetScrollPos(SB_HORZ);
+
+	cell_rect.left = x_offset + header_rect.left;
+	cell_rect.right = x_offset + header_rect.right;
+	cell_rect.top = item_rect.top;
+	cell_rect.bottom = item_rect.bottom;
+
+	header.Detach();
+}
+
+void CEventMessageDockerWnd::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	if (lpDrawItemStruct->CtlType != ODT_LISTVIEW)
+	{
+		return;
+	}
+
+	if(lpDrawItemStruct->itemAction != ODA_DRAWENTIRE)
+	{
+		return;
+	}
+
+
+	// must be implemented
+	HDC dc = lpDrawItemStruct->hDC;
+	CRect item_rect = lpDrawItemStruct->rcItem;
+	int item_id = lpDrawItemStruct->itemID;
+
+	bool checkered_toggle = (item_id % 2) != 0;
+
+
+
+	CHeader header;
+	
+	header.Attach(GetHeader());
+
+	int cols = header.GetItemCount();
+
+	header.Detach();
+
+
+	for (int n = 0; n < cols; n++)
+	{
+		CRect cell_rect;
+
+
+		GetCellRect(n, item_rect, cell_rect);
+
+
+
+		COLORREF square_color;
+
+		if (lpDrawItemStruct->itemState & ODS_SELECTED)
+		{
+			square_color = GetSysColor(COLOR_HIGHLIGHT);
+			::SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+		}
+		else
+		{
+			square_color = checkered_toggle ? RGB(230, 244, 255) : RGB(145, 200, 255);
+			::SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
+		}
+
+
+
+		HPEN square_pen = CreatePen(PS_SOLID, 1, square_color);
+		HBRUSH squares_brush = CreateSolidBrush(square_color);
+		SelectObject(dc, square_pen);
+		SelectObject(dc, squares_brush);
+		Rectangle(dc, cell_rect.left, cell_rect.top,cell_rect.right, cell_rect.bottom);
+		DeleteObject(square_pen);
+		DeleteObject(squares_brush);
+
+
+
+		std::stringstream ss;
+		ss << item_id << _T(":") << n;
+
+		DrawText(dc, ss.str().c_str(), ss.str().size(), cell_rect, DT_CENTER | DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE);
+
+
+
+		checkered_toggle = !checkered_toggle;
+	}
+}
+
+void CEventMessageDockerWnd::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+{
+	if(lpMeasureItemStruct->CtlType != ODT_MENU)
+	{
+		// return default height for a system font
+		HWND hWnd = GetDlgItem(lpMeasureItemStruct->CtlID);
+
+		CClientDC dc(hWnd);
+		TEXTMETRIC tm = { 0 };
+		dc.GetTextMetrics(tm);
+
+		lpMeasureItemStruct->itemHeight = tm.tmHeight + tm.tmExternalLeading + 10;
+	}
+	else
+	{
+		lpMeasureItemStruct->itemHeight = ::GetSystemMetrics(SM_CYMENU);
+	}
+}
+
+int CEventMessageDockerWnd::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
+{
+	// all items are equal
+	return 0;
+}
+
+void CEventMessageDockerWnd::DeleteItem(LPDELETEITEMSTRUCT lpDeleteItemStruct)
+{
+	// default - nothing
+}
 
 
 /////////////////////////////////////////////////////////////////////////////
