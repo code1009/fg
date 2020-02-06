@@ -14,6 +14,7 @@ void CMyDockerWnd::PreCreate(CREATESTRUCT& cs)
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 }
 
+//===========================================================================
 int CMyDockerWnd::OnCreate(CREATESTRUCT& cs)
 {
 	UNREFERENCED_PARAMETER(cs);
@@ -25,6 +26,27 @@ int CMyDockerWnd::OnCreate(CREATESTRUCT& cs)
 void CMyDockerWnd::OnDestroy()
 {
 	KillTimer(1);
+}
+
+//===========================================================================
+void CMyDockerWnd::OnDraw(CDC& dc)
+{
+	// OnDraw is called automatically whenever a part of the window needs to be redrawn.
+	Draw(dc);
+}
+
+//===========================================================================
+LRESULT CMyDockerWnd::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	switch (msg)
+	{
+	case WM_MOUSEACTIVATE:  return OnMouseActivate(msg, wparam, lparam);
+	case WM_SIZE:           return OnSize(msg, wparam, lparam);
+	case WM_TIMER:          return OnTimer(msg, wparam, lparam);
+//	case WM_PAINT:          return OnPaint(msg, wparam, lparam);
+	}
+
+	return WndProcDefault(msg, wparam, lparam);
 }
 
 LRESULT CMyDockerWnd::OnMouseActivate(UINT msg, WPARAM wparam, LPARAM lparam)
@@ -78,12 +100,7 @@ LRESULT CMyDockerWnd::OnPaint(UINT msg, WPARAM wparam, LPARAM lparam)
 	return 0;
 }
 
-void CMyDockerWnd::OnDraw(CDC& dc)
-{
-	// OnDraw is called automatically whenever a part of the window needs to be redrawn.
-	Draw(dc);
-}
-
+//===========================================================================
 void CMyDockerWnd::Draw (CDC& dc)
 {
 	CRect rc = GetClientRect();
@@ -103,18 +120,7 @@ void CMyDockerWnd::Draw (CDC& dc)
 	dc.DrawText(text, -1, rc, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 }
 
-LRESULT CMyDockerWnd::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	switch (msg)
-	{
-	case WM_MOUSEACTIVATE:  return OnMouseActivate(msg, wparam, lparam);
-	case WM_SIZE:           return OnSize(msg, wparam, lparam);
-	case WM_TIMER:          return OnTimer(msg, wparam, lparam);
-	case WM_PAINT:          return OnPaint(msg, wparam, lparam);
-	}
 
-	return WndProcDefault(msg, wparam, lparam);
-}
 
 
 
@@ -130,6 +136,8 @@ CMyDockContainer::CMyDockContainer()
 
 
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 CMyDocker::CMyDocker()
@@ -137,5 +145,7 @@ CMyDocker::CMyDocker()
 	SetView     (m_DockContainer);
 //	SetBarWidth (4);
 }
+
+
 
 

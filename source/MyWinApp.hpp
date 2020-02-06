@@ -10,14 +10,18 @@
 //===========================================================================
 class CMyWinApp : public CWinApp
 {
+private:
+	CMainFrame m_Mainframe;
+
 public:
 	CMyWinApp();
 	virtual ~CMyWinApp();
-	virtual BOOL InitInstance();
-	CMainFrame& GetMainFrame() { return m_Mainframe; }
 
-private:
-	CMainFrame m_Mainframe;
+public:
+	virtual BOOL InitInstance();
+
+public:
+	CMainFrame* GetMainFrame() { return &m_Mainframe; }
 };
 
 

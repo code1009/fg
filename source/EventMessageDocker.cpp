@@ -5,37 +5,398 @@
 
 
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-CEventMessageDockerWnd::CEventMessageDockerWnd()
+CXListViewInplaceEdit::CXListViewInplaceEdit(CXListView* listview, cx::int_t item, cx::int_t column, std::string text):
+	m_ListView(listview),
+	m_Item    (item)    ,
+	m_Column  (column)  ,
+	m_Text    (text)    ,
+	m_Cancel  (false)   
 {
 }
 
-CEventMessageDockerWnd::~CEventMessageDockerWnd()
+CXListViewInplaceEdit::~CXListViewInplaceEdit()
 {
-//    if (IsWindow()) DeleteAllItems();
 }
 
 //===========================================================================
-void CEventMessageDockerWnd::PreCreate(CREATESTRUCT& cs)
-{
-	CListView::PreCreate(cs);
-
-	cs.dwExStyle |= WS_EX_CLIENTEDGE;
-
-//	cs.style |= (LVS_OWNERDRAWFIXED);
-	cs.style |= (LVS_OWNERDATA|LVS_OWNERDRAWFIXED);
-//	cs.style |= (LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDATA);
-}
-
-void CEventMessageDockerWnd::OnAttach()
+void CXListViewInplaceEdit::PreCreate(CREATESTRUCT& cs)
 {
 	//-----------------------------------------------------------------------
-	m_SmallImageList.Create(16, 15, ILC_COLOR32 | ILC_MASK, 1, 0);
+	DWORD dwStyle;
+	DWORD dwExStyle;
 
-//	SetImageList(m_SmallImageList, LVSIL_SMALL);
+
+	dwStyle = 
+		WS_CHILD           |
+		WS_VISIBLE         |
+		WS_CLIPSIBLINGS    |
+		WS_CLIPCHILDREN    |
+		WS_BORDER          |
+		ES_AUTOHSCROLL     |
+//		ES_MULTILINE       |
+//		ES_UPPERCASE       |
+		0u;
+
+	dwExStyle = 
+//		WS_EX_CLIENTEDGE   |
+		0u;
 
 
+	//-----------------------------------------------------------------------
+	CEdit::PreCreate(cs);
+
+	cs.style     |= dwStyle;
+	cs.dwExStyle |= dwExStyle;
+}
+
+//===========================================================================
+int CXListViewInplaceEdit::OnCreate(CREATESTRUCT& cs)
+{
+	int result;
+
+
+	result = CEdit::OnCreate(cs);
+
+	return result;
+}
+
+void CXListViewInplaceEdit::OnAttach()
+{
+#if 0
+	// ES_MULTILINE
+	CRect rect;
+
+		
+	GetRect(rect);
+	rect.top+=5;
+	SetRect(rect);
+#endif
+
+
+	SetFont( GetParent().GetFont() );
+//	SetMargins(2+8, 8);
+
+	SetWindowText( m_Text.c_str() );
+	SetFocus();
+	SetSel( -1, TRUE );
+}
+
+void CXListViewInplaceEdit::OnDestroy()
+{
+	CEdit::OnDestroy();
+}
+
+//===========================================================================
+BOOL CXListViewInplaceEdit::PreTranslateMessage(MSG& msg)
+{
+	if (msg.message == WM_KEYDOWN)
+	{
+		if (msg.wParam == VK_RETURN|| 
+		    msg.wParam == VK_DELETE|| 
+		    msg.wParam == VK_ESCAPE|| 
+		    GetKeyState(VK_CONTROL))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage (&msg);
+			return TRUE; // DO NOT process further
+		}
+	}
+
+	return CEdit::PreTranslateMessage(msg);
+}
+
+//===========================================================================
+LRESULT CXListViewInplaceEdit::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	switch (msg)
+	{
+	case WM_NCDESTROY : return OnNcDestroy  (msg, wparam, lparam);
+	case WM_KEYDOWN   : return OnKeyDown    (msg, wparam, lparam);
+	case WM_CHAR      : return OnChar       (msg, wparam, lparam);
+	case WM_SETFOCUS  : return OnSetFocus   (msg, wparam, lparam);
+	case WM_KILLFOCUS : return OnKillFocus  (msg, wparam, lparam);
+	case WM_GETDLGCODE: return OnGetDlgCode (msg, wparam, lparam);
+
+	default:
+		break;
+	}
+
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListViewInplaceEdit::OnNcDestroy(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//-----------------------------------------------------------------------
+	LRESULT lResult;
+	
+	
+	lResult = WndProcDefault(msg, wparam, lparam);
+
+
+	//-----------------------------------------------------------------------
+	void* pointer;
+
+
+	pointer = this;
+
+
+	//-----------------------------------------------------------------------
+	UINT   nm_msg;
+	WPARAM nm_wparam;
+	LPARAM nm_lparam;
+
+
+	nm_msg    = WM_USER+20;
+	nm_wparam = WPARAM(0);
+	nm_lparam = LPARAM(pointer);
+
+	GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
+
+
+	//-----------------------------------------------------------------------
+	return lResult;
+}
+
+LRESULT CXListViewInplaceEdit::OnKeyDown(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//-----------------------------------------------------------------------
+	int lLow, lHigh;
+
+
+	//-----------------------------------------------------------------------
+	void* pointer;
+
+
+	pointer = this;
+
+
+	//-----------------------------------------------------------------------
+	UINT   nm_msg;
+	WPARAM nm_wparam;
+	LPARAM nm_lparam;
+
+
+	nm_msg    = WM_USER+22;
+	nm_wparam = WPARAM(wparam);
+	nm_lparam = LPARAM(pointer);
+
+
+	//-----------------------------------------------------------------------
+	switch (wparam) 
+	{
+	case VK_ESCAPE:
+		{
+			m_Cancel = true;
+			::SetFocus(GetParent());
+			return 0;
+		}
+		break;
+
+	case VK_RETURN:
+		{
+			::SetFocus(GetParent());
+			// FIX: Allowing a multiline EDIT to VK_ESCAPE will send a WM_CLOSE
+			//      to the list control if it's embedded in a dialog!?
+			return 0;
+		}
+		break;
+
+	case VK_TAB:
+	case VK_UP:
+	case VK_DOWN:
+		{
+			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
+			::SetFocus(GetParent());
+			return 0;
+		}
+		break;
+
+	case VK_LEFT:
+		{
+			GetSel(lLow, lHigh);
+			if (lLow != lHigh || lLow != 0)
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
+			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
+			::SetFocus(GetParent());
+			return 0;
+		}
+		break;
+
+	case VK_RIGHT:
+		{
+			GetSel(lLow, lHigh);
+			if (lLow != lHigh || lLow != GetWindowTextLength())
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
+			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
+			::SetFocus(GetParent());
+			return 0;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListViewInplaceEdit::OnChar(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	switch( LOWORD(wparam) ) 
+	{
+	case VK_RETURN:
+	case VK_ESCAPE:
+		{
+			// Do not BEEP!!!!
+			return 0;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListViewInplaceEdit::OnSetFocus(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	m_Cancel = false;
+
+
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListViewInplaceEdit::OnKillFocus(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	LRESULT lResult;
+	
+	
+	lResult = WndProcDefault(msg, wparam, lparam);
+
+	m_Cancel |= (GetModify() == FALSE);
+
+
+	//-----------------------------------------------------------------------
+	CString s;
+
+
+	s = GetWindowText();
+	m_Text = s.c_str();
+
+
+	//-----------------------------------------------------------------------
+	void* pointer;
+
+
+	pointer = this;
+
+
+	//-----------------------------------------------------------------------
+	UINT   nm_msg;
+	WPARAM nm_wparam;
+	LPARAM nm_lparam;
+
+
+	nm_msg    = WM_USER+21;
+	nm_wparam = WPARAM(m_Cancel ? 0 : 1);
+	nm_lparam = LPARAM(pointer);
+
+	GetParent().SendMessage(nm_msg, nm_wparam, nm_lparam);
+
+
+	//-----------------------------------------------------------------------
+	Destroy();
+
+
+	//-----------------------------------------------------------------------
+	return lResult;
+}
+
+LRESULT CXListViewInplaceEdit::OnGetDlgCode(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	return WndProcDefault(msg, wparam, lparam) | DLGC_WANTALLKEYS | DLGC_WANTARROWS;
+}
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//===========================================================================
+CXListView::CXListView()
+{
+}
+
+CXListView::~CXListView()
+{
+	//--------------------------------------------------------------------------
+//	if (IsWindow()) DeleteAllItems();
+
+
+	//--------------------------------------------------------------------------
+	std::vector<CXListViewInplaceEdit*>::iterator i;
+
+	CXListViewInplaceEdit* e;
+
+
+	for (i=m_InplaceEditContainer.begin();i!=m_InplaceEditContainer.end();i++)
+	{
+		e = *i;
+		delete e;
+	}
+}
+
+//===========================================================================
+void CXListView::PreCreate(CREATESTRUCT& cs)
+{
+	//-----------------------------------------------------------------------
+	DWORD dwStyle;
+	DWORD dwExStyle;
+
+
+	dwStyle = 
+//		WS_CHILD           |
+//		WS_VISIBLE         |
+//		WS_CLIPSIBLINGS    |
+//		WS_CLIPCHILDREN    |
+		LVS_REPORT         |
+		LVS_SHOWSELALWAYS  |
+		LVS_OWNERDATA      |
+		LVS_OWNERDRAWFIXED |
+		0u;
+
+	dwExStyle = 
+		WS_EX_CLIENTEDGE   |
+		0u;
+
+
+	//-----------------------------------------------------------------------
+	CListView::PreCreate(cs);
+
+	cs.style     |= dwStyle;
+	cs.dwExStyle |= dwExStyle;
+}
+
+void CXListView::OnDestroy()
+{
+	SetImageList(NULL, LVSIL_SMALL);
+}
+
+void CXListView::OnAttach()
+{
 	//-----------------------------------------------------------------------
 	DWORD dwStyle;
 	DWORD dwExtendedStyle;
@@ -53,9 +414,9 @@ void CEventMessageDockerWnd::OnAttach()
 		0u;
 
 	dwExtendedStyle = 
-		LVS_EX_FULLROWSELECT    |
-		LVS_EX_GRIDLINES        |
 		LVS_EX_DOUBLEBUFFER     |
+		LVS_EX_GRIDLINES        |
+		LVS_EX_FULLROWSELECT    |
 //		LVS_EX_LABELTIP 	    |
 //		LVS_EX_SUBITEMIMAGES    |
 //		LVS_EX_TRANSPARENTBKGND |
@@ -63,6 +424,12 @@ void CEventMessageDockerWnd::OnAttach()
 
 	SetStyle         (dwStyle);
 	SetExtendedStyle (dwExtendedStyle);
+
+
+	//-----------------------------------------------------------------------
+	m_SmallImageList.Create(16, 15, ILC_COLOR32 | ILC_MASK, 1, 0);
+
+//	SetImageList(m_SmallImageList, LVSIL_SMALL);
 
 
 	//--------------------------------------------------------------------------
@@ -101,45 +468,377 @@ void CEventMessageDockerWnd::OnAttach()
 	LvColumn.cchTextMax= 1024*3; // GetItem올때 가져올수있는 크기 (시하는 텍스트는 259+1[MAX_PATH]널문자로 제한됨)
 	LvColumn.iSubItem  = 3;
 	InsertColumn(3, LvColumn);
-	
 
+
+	//--------------------------------------------------------------------------
 	SetItemCountEx (100, LVSICF_NOSCROLL);
 }
 
-void CEventMessageDockerWnd::OnDestroy()
-{
-	SetImageList(NULL, LVSIL_SMALL);
-}
-
-LRESULT CEventMessageDockerWnd::OnMouseActivate(UINT msg, WPARAM wparam, LPARAM lparam)
-// Respond to a mouse click on the window
-{
-	SetFocus();
-	return FinalWindowProc(msg, wparam, lparam);
-}
-
-LRESULT CEventMessageDockerWnd::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
+//===========================================================================
+LRESULT CXListView::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
-	case WM_MOUSEACTIVATE:  return OnMouseActivate(msg, wparam, lparam);
+	case WM_MOUSEACTIVATE: return OnMouseActivate(msg, wparam, lparam);
+	case WM_LBUTTONDOWN  : return OnLButtonDown  (msg, wparam, lparam);
+	case WM_MOUSEWHEEL   : return OnMouseWheel   (msg, wparam, lparam); 
+	case WM_HSCROLL      : return OnHScroll      (msg, wparam, lparam);
+	case WM_VSCROLL      : return OnVScroll      (msg, wparam, lparam);
 
-	case WM_DRAWITEM:    return OnDrawItem(wparam, lparam);
-	case WM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
-	case WM_COMPAREITEM: return OnCompareItem(wparam, lparam);
-	case WM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
-/*
-	case OCM_DRAWITEM:    return OnDrawItem(wparam, lparam);
-	case OCM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
-	case OCM_COMPAREITEM: return OnCompareItem(wparam, lparam);
-	case OCM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
-*/
+	case WM_USER+20:
+		{
+			CXListViewInplaceEdit* e;
+
+
+			e = (CXListViewInplaceEdit*)lparam;
+
+
+			std::vector<CXListViewInplaceEdit*>::iterator i;
+
+
+			i = std::find(m_InplaceEditContainer.begin(), m_InplaceEditContainer.end(), e);
+			if (i!=m_InplaceEditContainer.end())
+			{
+				m_InplaceEditContainer.erase(i);
+			}
+
+
+			delete e;
+
+
+			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Delete", e);
+			return 0;
+		}
+		break;
+
+	case WM_USER+21:
+		{
+			CXListViewInplaceEdit* e;
+			UINT ok;
+
+			ok = wparam;
+			e = (CXListViewInplaceEdit*)lparam;
+
+
+			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Update=%d", e, ok);
+		}
+		break;
+
+	case WM_USER+22:
+		{
+			CXListViewInplaceEdit* e;
+			UINT vkey;
+
+			vkey = wparam;
+			e = (CXListViewInplaceEdit*)lparam;
+
+			switch (vkey)
+			{
+			case VK_TAB:
+				NewInplaceEdit(e->m_Item+1, e->m_Column);
+				break;
+
+			case VK_UP:
+				NewInplaceEdit(e->m_Item-1, e->m_Column);
+				break;
+
+			case VK_DOWN:
+				NewInplaceEdit(e->m_Item+1, e->m_Column);
+				break;
+
+			case VK_LEFT:
+				NewInplaceEdit(e->m_Item, e->m_Column-1);
+				break;
+
+			case VK_RIGHT:
+				NewInplaceEdit(e->m_Item, e->m_Column+1);
+				break;
+
+			default:
+				break;
+			}
+
+			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Navigation %d", e, vkey);
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return WndProcDefault(msg, wparam, lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnNotifyReflect(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnMouseActivate(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	SetFocus();
+	return FinalWindowProc(msg, wparam, lparam);
+}
+
+LRESULT CXListView::OnLButtonDown(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	CPoint ptMouse((short)LOWORD(lparam), (short)HIWORD(lparam));
+	UINT   uMouseFlag = wparam;
+	WORD   fwKeys     = LOWORD(wparam);
+	SHORT  zDelta     = HIWORD(wparam);
+
+
+	//-----------------------------------------------------------------------
+	int row;
+	int col;
+
+	int result;
+	LVHITTESTINFO hti;
+
+
+	ZeroMemory(&hti, sizeof(hti));
+	hti.flags = 0u;
+	hti.pt    = ptMouse;
+	result    = HitTest(hti);
+	row       = hti.iItem;
+
+	ZeroMemory(&hti, sizeof(hti));
+	hti.flags = 0u;
+	hti.pt    = ptMouse;
+	result    = SubItemHitTest(hti);   
+	col       = hti.iSubItem;
+
+
+	if (0<=row && 0<=col)
+	{
+		NewInplaceEdit( row, col );
+
+		return 0;
+	}
+
+
+	//-----------------------------------------------------------------------
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListView::OnHScroll (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	int  code     ;
+	HWND scrollbar;
+	int  position ;
+
+
+	//-----------------------------------------------------------------------
+	code       = (int )LOWORD(wparam);
+	scrollbar  = (HWND)lparam;
+
+	if (SB_THUMBTRACK   == code || 
+		SB_THUMBPOSITION== code  )
+	{
+		position = (SHORT)HIWORD(wparam);
+	}
+	else
+	{
+		position = GetScrollPos(SB_HORZ);
+	}
+
+
+	//-----------------------------------------------------------------------
+	if( GetFocus() != GetHwnd() )
+	{
+		SetFocus();
+	}
+
+
+	//-----------------------------------------------------------------------
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListView::OnVScroll (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	int  code     ;
+	HWND scrollbar;
+
+	int  position ;
+
+
+	//-----------------------------------------------------------------------
+	code       = (int )LOWORD(wparam);
+	scrollbar  = (HWND)lparam;
+
+	if (SB_THUMBTRACK   == code || 
+		SB_THUMBPOSITION== code  )
+	{
+		position = (SHORT)HIWORD(wparam);
+	}
+	else
+	{
+		position = GetScrollPos(SB_VERT);
+	}
+
+
+	//-----------------------------------------------------------------------
+	if( GetFocus() != GetHwnd() )
+	{
+		SetFocus();
+	}
+
+
+	//-----------------------------------------------------------------------
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListView::OnMouseWheel (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	CPoint ptMouse((short)LOWORD(lparam), (short)HIWORD(lparam));
+	UINT   uMouseFlag = wparam;
+
+	WORD  fwKeys = LOWORD(wparam);
+	SHORT zDelta = HIWORD(wparam);
+
+
+	//-----------------------------------------------------------------------
+	if( GetFocus() != GetHwnd() )
+	{
+		SetFocus();
+	}
+
+
+	//-----------------------------------------------------------------------
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+void CXListView::NewInplaceEdit( int nItem, int nCol )
+{
+	//-----------------------------------------------------------------------
+	if( !EnsureVisible( nItem, TRUE ) )
+	{
+		return;
+	}
+
+
+	//-----------------------------------------------------------------------
+	// Make sure that nCol is valid
+	CHeader header;
+	int column_count;
+
+
+	header.Attach(GetHeader());
+	column_count = header.GetItemCount();
+	header.Detach();
+
+	if( nCol >= column_count || GetColumnWidth(nCol) < 5 )
+	{
+		return;
+	}
+
+
+	//-----------------------------------------------------------------------
+	// Get the column offset
+	int offset;
+	int i;
+
+
+	offset = 0;
+	for(i = 0; i < nCol; i++ )
+	{
+		offset += GetColumnWidth( i );
+	}
+
+
+	//-----------------------------------------------------------------------
+	CRect rect;
+
+
+	GetItemRect( nItem, rect, LVIR_BOUNDS );
+ 
+
+	//-----------------------------------------------------------------------
+	// Now scroll if we need to expose the column
+	CRect rcClient;
+
+
+	rcClient = GetClientRect();
+	if( offset + rect.left < 0 || offset + rect.left > rcClient.right )
+	{
+		CSize size;
+
+
+		size.cx = offset + rect.left;
+		size.cy = 0;
+		
+		Scroll( size );
+
+		rect.left -= size.cx;
+	}
+ 
+
+	//-----------------------------------------------------------------------
+	// Get Column alignment
+	LV_COLUMN column;
+	
+	
+	column.mask = LVCF_FMT;
+	GetColumn( nCol, column );
+
+
+	//-----------------------------------------------------------------------
+	DWORD dwStyle;
+
+
+	if     ((column.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_LEFT ) { dwStyle = ES_LEFT  ; }
+	else if((column.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_RIGHT) { dwStyle = ES_RIGHT ; }
+	else                                                     { dwStyle = ES_CENTER; }
+
+	dwStyle |= WS_VISIBLE|WS_CHILD|WS_BORDER|ES_AUTOHSCROLL;
+ 
+
+	//-----------------------------------------------------------------------
+//	rect.left += offset+4;
+//	rect.right = rect.left + GetColumnWidth( nCol ) - 3 ;
+
+	rect.left += offset;
+	rect.right = rect.left + GetColumnWidth( nCol ) + 1;
+
+	rect.left++;
+	rect.bottom--;
+	rect.right--;
+
+	if( rect.right > rcClient.right)
+	{
+		rect.right = rcClient.right;
+	}
+
+
+	//-----------------------------------------------------------------------
+	CXListViewInplaceEdit *pEdit;
+
+
+	pEdit = new CXListViewInplaceEdit(
+		this,
+		nItem, nCol, 
+		std::string("text")
+		);
+
+
+//	pEdit->Create( dwStyle, rect, this, 1000 );
+	pEdit->Create(GetHwnd());
+	pEdit->MoveWindow(rect);
+/*
+	pEdit->SetFocus();
+
+	{
+		CRect rect;
+
+		
+		pEdit->GetRect(rect);
+		rect.top+=10;
+		pEdit->SetRect(rect);
+	}
+*/
+
+	m_InplaceEditContainer.push_back(pEdit);
+
+	CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): New", pEdit);
+}
+
+//===========================================================================
+LRESULT CXListView::OnNotifyReflect(WPARAM wparam, LPARAM lparam)
 {
 	LPNMHDR NmHdr = reinterpret_cast<LPNMHDR>(lparam);
 
@@ -147,14 +846,14 @@ LRESULT CEventMessageDockerWnd::OnNotifyReflect(WPARAM wparam, LPARAM lparam)
 	switch (NmHdr->code)
 	{
 	case LVN_GETDISPINFO:
-		return OnLvnGetDispInfo(wparam, lparam);
+//		return OnLvnGetDispInfo(wparam, lparam);
 		break;
 
 	case LVN_BEGINLABELEDIT:
 		break;
 
 	case NM_CUSTOMDRAW:
-		return OnNmCustomDraw(wparam, lparam);
+//		return OnNmCustomDraw(wparam, lparam);
 		break;
 
 	default:
@@ -165,7 +864,7 @@ LRESULT CEventMessageDockerWnd::OnNotifyReflect(WPARAM wparam, LPARAM lparam)
 	return CListView::OnNotifyReflect(wparam, lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnLvnGetDispInfo (WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnLvnGetDispInfo (WPARAM wparam, LPARAM lparam)
 {
 	NMLVDISPINFO *NmLvDispInfo = reinterpret_cast<NMLVDISPINFO*>(lparam);
 	LVITEM*       LvItem       = &NmLvDispInfo->item;
@@ -173,65 +872,64 @@ LRESULT CEventMessageDockerWnd::OnLvnGetDispInfo (WPARAM wparam, LPARAM lparam)
 
 	if (LvItem->mask & LVIF_TEXT)
 	{
-		strncpy (LvItem->pszText, "text", LvItem->cchTextMax);
+		strncpy (LvItem->pszText, "Text", LvItem->cchTextMax);
 	}
 
 	return 0;
 }
 
-LRESULT CEventMessageDockerWnd::OnLvnBeginLabelEdit (WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnLvnBeginLabelEdit (WPARAM wparam, LPARAM lparam)
 {
 	return CListView::OnNotify(wparam, lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnNmCustomDraw (WPARAM wparam, LPARAM lparam)
+//---------------------------------------------------------------------------
+LRESULT CXListView::OnNmCustomDraw (WPARAM wparam, LPARAM lparam)
 {
 	LPNMCUSTOMDRAW NmCustomDraw = reinterpret_cast<LPNMCUSTOMDRAW>(lparam);
-	LRESULT        Result       = 0;
 
 
 	switch(NmCustomDraw->dwDrawStage)
 	{
-	case  CDDS_PREPAINT       : return OnPrePaint       (wparam, lparam); break;
-	case  CDDS_POSTPAINT      : return OnPostPaint      (wparam, lparam); break;
-	case  CDDS_PREERASE       : return OnPreErase       (wparam, lparam); break;
-	case  CDDS_POSTERASE      : return OnPostErase      (wparam, lparam); break;
-	case  CDDS_ITEMPREPAINT   : return OnItemPrePaint   (wparam, lparam); break;
-	case  CDDS_ITEMPOSTPAINT  : return OnItemPostPaint  (wparam, lparam); break;
-	case  CDDS_ITEMPREERASE   : return OnItemPreErase   (wparam, lparam); break;
-	case  CDDS_ITEMPOSTERASE  : return OnItemPostErase  (wparam, lparam); break;
+	case  CDDS_PREPAINT       : return OnPrePaint       (wparam, lparam);
+	case  CDDS_POSTPAINT      : return OnPostPaint      (wparam, lparam);
+	case  CDDS_PREERASE       : return OnPreErase       (wparam, lparam);
+	case  CDDS_POSTERASE      : return OnPostErase      (wparam, lparam);
+	case  CDDS_ITEMPREPAINT   : return OnItemPrePaint   (wparam, lparam);
+	case  CDDS_ITEMPOSTPAINT  : return OnItemPostPaint  (wparam, lparam);
+	case  CDDS_ITEMPREERASE   : return OnItemPreErase   (wparam, lparam);
+	case  CDDS_ITEMPOSTERASE  : return OnItemPostErase  (wparam, lparam);
 	case (CDDS_ITEMPREPAINT |
-	      CDDS_SUBITEM      ) : return OnSubItemPrePaint(wparam, lparam); break;
+	      CDDS_SUBITEM      ) : return OnSubItemPrePaint(wparam, lparam);
 
 	default:
-		return CListView::OnNotify(wparam, lparam);
 		break;
 	}
 	
-	return Result;
+	return CListView::OnNotify(wparam, lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnPrePaint(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnPrePaint(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_NOTIFYITEMDRAW;
 }
 
-LRESULT CEventMessageDockerWnd::OnPostPaint(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnPostPaint(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnPreErase(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnPreErase(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnPostErase(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnPostErase(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnItemPrePaint(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnItemPrePaint(WPARAM wparam, LPARAM lparam)
 {
 	NMLVCUSTOMDRAW* NmLvCustomDraw = reinterpret_cast<LPNMLVCUSTOMDRAW>(lparam);
 
@@ -248,66 +946,63 @@ LRESULT CEventMessageDockerWnd::OnItemPrePaint(WPARAM wparam, LPARAM lparam)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnItemPostPaint(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnItemPostPaint(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnItemPreErase(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnItemPreErase(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnItemPostErase(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnItemPostErase(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CEventMessageDockerWnd::OnSubItemPrePaint(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnSubItemPrePaint(WPARAM wparam, LPARAM lparam)
 {
 	return CDRF_DODEFAULT;
 }
 
-//---------------------------------------------------------------------------
-LRESULT CEventMessageDockerWnd::OnMessageReflect(UINT msg, WPARAM wparam, LPARAM lparam)
+//===========================================================================
+LRESULT CXListView::OnMessageReflect(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
-	case WM_DRAWITEM:    return OnDrawItem(wparam, lparam);
-	case WM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
-	case WM_COMPAREITEM: return OnCompareItem(wparam, lparam);
-	case WM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
-/*
-	case OCM_DRAWITEM:    return OnDrawItem(wparam, lparam);
-	case OCM_MEASUREITEM: return OnMeasureItem(wparam, lparam);
-	case OCM_COMPAREITEM: return OnCompareItem(wparam, lparam);
-	case OCM_DELETEITEM:  return OnDeleteItem(wparam, lparam);
-*/
+	case WM_DRAWITEM    : return OnDrawItem   (msg, wparam, lparam);
+	case WM_MEASUREITEM : return OnMeasureItem(msg, wparam, lparam);
+	case WM_COMPAREITEM : return OnCompareItem(msg, wparam, lparam);
+	case WM_DELETEITEM  : return OnDeleteItem (msg, wparam, lparam);
+
+	default:
+		break;
 	}
 
 	return CListView::OnMessageReflect(msg, wparam, lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnDrawItem(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnDrawItem(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	DrawItem((LPDRAWITEMSTRUCT)lparam);
 
 	return (LRESULT)TRUE;
 }
 
-LRESULT CEventMessageDockerWnd::OnMeasureItem(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnMeasureItem(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	MeasureItem((LPMEASUREITEMSTRUCT)lparam);
 
 	return (LRESULT)TRUE;
 }
 
-LRESULT CEventMessageDockerWnd::OnCompareItem(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnCompareItem(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	return CompareItem((LPCOMPAREITEMSTRUCT)lparam);
 }
 
-LRESULT CEventMessageDockerWnd::OnDeleteItem(WPARAM wparam, LPARAM lparam)
+LRESULT CXListView::OnDeleteItem(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	DeleteItem((LPDELETEITEMSTRUCT)lparam);
 
@@ -315,29 +1010,31 @@ LRESULT CEventMessageDockerWnd::OnDeleteItem(WPARAM wparam, LPARAM lparam)
 }
 
 //---------------------------------------------------------------------------
-void CEventMessageDockerWnd::GetCellRect(int header_column, const CRect& item_rect, CRect& cell_rect)
+void CXListView::GetCellRect(int header_column, const CRect& item_rect, CRect& cell_rect)
 {
+	CRect header_rect;
+
+
 	CHeader header;
 	
-	header.Attach(GetHeader());
 
-	CRect header_rect;
+	header.Attach(GetHeader());
 	header_rect = header.GetItemRect(header_column);
+	header.Detach();
+
 
 	// If we don't do this, when we scroll to the right, we will be 
 	// drawing as if we weren't and your cells won't line up with the
 	// columns.
 	int x_offset = -GetScrollPos(SB_HORZ);
 
-	cell_rect.left = x_offset + header_rect.left;
-	cell_rect.right = x_offset + header_rect.right;
-	cell_rect.top = item_rect.top;
+	cell_rect.left   = x_offset + header_rect.left;
+	cell_rect.right  = x_offset + header_rect.right;
+	cell_rect.top    = item_rect.top;
 	cell_rect.bottom = item_rect.bottom;
-
-	header.Detach();
 }
 
-void CEventMessageDockerWnd::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+void CXListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	if (lpDrawItemStruct->CtlType != ODT_LISTVIEW)
 	{
@@ -350,80 +1047,133 @@ void CEventMessageDockerWnd::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 
-	// must be implemented
-	HDC dc = lpDrawItemStruct->hDC;
-	CRect item_rect = lpDrawItemStruct->rcItem;
-	int item_id = lpDrawItemStruct->itemID;
-
-	bool checkered_toggle = (item_id % 2) != 0;
-
-
-
+	//-----------------------------------------------------------------------
+	int     column_count;
 	CHeader header;
 	
+
 	header.Attach(GetHeader());
-
-	int cols = header.GetItemCount();
-
+	column_count = header.GetItemCount();
 	header.Detach();
 
 
-	for (int n = 0; n < cols; n++)
+	//-----------------------------------------------------------------------
+	HDC   dc       ;
+	CRect item_rect;
+	int   item_id  ;
+
+
+	dc        = lpDrawItemStruct->hDC;
+	item_rect = lpDrawItemStruct->rcItem;
+	item_id   = lpDrawItemStruct->itemID;
+
+
+	//-----------------------------------------------------------------------
+	COLORREF normal_text_color;
+	COLORREF normal_bg_color;
+	COLORREF normal_fg_color;
+	HPEN     normal_pen ;
+	HBRUSH   normal_brush;
+
+	COLORREF selected_text_color;
+	COLORREF selected_bg_color;
+	COLORREF selected_fg_color;
+	HPEN     selected_pen  ;
+	HBRUSH   selected_brush;
+
+
+	normal_text_color   = GetSysColor(COLOR_BTNTEXT);
+	normal_bg_color     = RGB(255,255,255);
+	normal_fg_color     = RGB(255,255,255);
+	normal_pen          = CreatePen(PS_SOLID, 1, normal_fg_color);
+	normal_brush        = CreateSolidBrush(normal_bg_color);
+
+	selected_text_color = GetSysColor(COLOR_HIGHLIGHTTEXT);
+	selected_bg_color   = GetSysColor(COLOR_HIGHLIGHT);
+	selected_fg_color   = GetSysColor(COLOR_HIGHLIGHT);
+	selected_pen        = CreatePen(PS_SOLID, 1, selected_fg_color);
+	selected_brush      = CreateSolidBrush(selected_bg_color);
+
+
+	//-----------------------------------------------------------------------
+	UINT     text_format;
+	COLORREF text_color;
+	HPEN     pen ;
+	HBRUSH   brush;
+
+	CRect cell_rect;
+	int   n;
+
+
+	for (n=0; n<column_count; n++)
 	{
-		CRect cell_rect;
-
-
+		//-------------------------------------------------------------------
 		GetCellRect(n, item_rect, cell_rect);
 
 
-
-		COLORREF square_color;
-
+		//-------------------------------------------------------------------
 		if (lpDrawItemStruct->itemState & ODS_SELECTED)
 		{
-			square_color = GetSysColor(COLOR_HIGHLIGHT);
-			::SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+			pen   = selected_pen  ;
+			brush = selected_brush;
+			text_color = selected_text_color;
 		}
 		else
 		{
-			square_color = checkered_toggle ? RGB(230, 244, 255) : RGB(145, 200, 255);
-			::SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
+			pen   = normal_pen  ;
+			brush = normal_brush;
+			text_color = normal_text_color;
 		}
 
 
-
-		HPEN square_pen = CreatePen(PS_SOLID, 1, square_color);
-		HBRUSH squares_brush = CreateSolidBrush(square_color);
-		SelectObject(dc, square_pen);
-		SelectObject(dc, squares_brush);
-		Rectangle(dc, cell_rect.left, cell_rect.top,cell_rect.right, cell_rect.bottom);
-		DeleteObject(square_pen);
-		DeleteObject(squares_brush);
+		//-------------------------------------------------------------------
+		SelectObject(dc, pen);
+		SelectObject(dc, brush);
+		Rectangle   (dc, cell_rect.left, cell_rect.top, cell_rect.right, cell_rect.bottom);
 
 
-
+		//-------------------------------------------------------------------
 		std::stringstream ss;
 		ss << item_id << _T(":") << n;
 
-		DrawText(dc, ss.str().c_str(), ss.str().size(), cell_rect, DT_CENTER | DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE);
+
+		//-------------------------------------------------------------------
+		text_format = DT_CENTER | DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE;
 
 
-
-		checkered_toggle = !checkered_toggle;
+		//-------------------------------------------------------------------
+		::SetTextColor(dc, text_color);
+		::DrawText    (dc, ss.str().c_str(), ss.str().size(), cell_rect, text_format);
 	}
+
+
+	DeleteObject(selected_pen  );
+	DeleteObject(selected_brush);
+	DeleteObject(normal_pen    );
+	DeleteObject(normal_brush  );
 }
 
-void CEventMessageDockerWnd::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+void CXListView::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
 	if(lpMeasureItemStruct->CtlType != ODT_MENU)
 	{
 		// return default height for a system font
-		HWND hWnd = GetDlgItem(lpMeasureItemStruct->CtlID);
+		//-------------------------------------------------------------------
+		HWND hWnd;
 
+
+		hWnd = GetDlgItem(lpMeasureItemStruct->CtlID);
+
+
+		//-------------------------------------------------------------------
 		CClientDC dc(hWnd);
 		TEXTMETRIC tm = { 0 };
+
+
 		dc.GetTextMetrics(tm);
 
+
+		//-------------------------------------------------------------------
 		lpMeasureItemStruct->itemHeight = tm.tmHeight + tm.tmExternalLeading + 10;
 	}
 	else
@@ -432,16 +1182,19 @@ void CEventMessageDockerWnd::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct
 	}
 }
 
-int CEventMessageDockerWnd::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
+int CXListView::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
 {
 	// all items are equal
 	return 0;
 }
 
-void CEventMessageDockerWnd::DeleteItem(LPDELETEITEMSTRUCT lpDeleteItemStruct)
+void CXListView::DeleteItem(LPDELETEITEMSTRUCT lpDeleteItemStruct)
 {
 	// default - nothing
 }
+
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -456,6 +1209,8 @@ CEventMessageDockContainer::CEventMessageDockContainer()
 
 
 
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 CEventMessageDocker::CEventMessageDocker()
@@ -463,5 +1218,7 @@ CEventMessageDocker::CEventMessageDocker()
 	SetView     (m_DockContainer);
 //	SetBarWidth (4);
 }
+
+
 
 

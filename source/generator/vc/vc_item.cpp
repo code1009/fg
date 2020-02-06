@@ -236,11 +236,11 @@ void vc_item_collection::add (std::string file_path, std::string filter)
 
 	if ( is_vc_item_ClCompile_PrecompiledHeader_Create(file_path) )
 	{
-		item->_option = "ClCompile_PCHCreate";
+		item->_option = "ClCompile_PrecompiledHeader_Create";
 	}
 	if ( is_vc_item_ClCompile_PrecompiledHeader_NotUsing(file_path) )
 	{
-		item->_option = "ClCompile_PCHNotUsing";
+		item->_option = "ClCompile_PrecompiledHeader_NotUsing";
 	}
 	if ( is_vc_item_CustomBuild_Ribbon(file_path) )
 	{

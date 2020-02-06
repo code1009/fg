@@ -1027,18 +1027,18 @@ void vc_project_generator::TAG_ItemGroup_SUBTAG(vc_item* item)
 	}
 	else
 	{
-		//	"ClCompile_PCH"     
+		//	"ClCompile_PrecompiledHeader_XXX"     
 		//	"CustomBuild_Ribbon"
 
 		if      (item->_type=="ClCompile")
 		{
-			if (item->_option=="ClCompile_PCHCreate")
+			if (item->_option=="ClCompile_PrecompiledHeader_Create")
 			{
-				TAG_ItemGroup_SUBTAG_ClCompile_PCH(item, "Create");
+				TAG_ItemGroup_SUBTAG_ClCompile_PrecompiledHeader(item, "Create");
 			}
-			if (item->_option=="ClCompile_PCHNotUsing")
+			if (item->_option=="ClCompile_PrecompiledHeader_NotUsing")
 			{
-				TAG_ItemGroup_SUBTAG_ClCompile_PCH(item, "NotUsing");
+				TAG_ItemGroup_SUBTAG_ClCompile_PrecompiledHeader(item, "NotUsing");
 			}
 		}
 		else if (item->_type=="CustomBuild")
@@ -1051,7 +1051,7 @@ void vc_project_generator::TAG_ItemGroup_SUBTAG(vc_item* item)
 	}
 }
 
-void vc_project_generator::TAG_ItemGroup_SUBTAG_ClCompile_PCH(vc_item* item, std::string value)
+void vc_project_generator::TAG_ItemGroup_SUBTAG_ClCompile_PrecompiledHeader(vc_item* item, std::string value)
 {
 	//--------------------------------------------------------------------------
 	_oss << ispace2(2) 

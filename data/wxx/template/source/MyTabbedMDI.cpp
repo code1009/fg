@@ -11,6 +11,10 @@ CMyTabbedMDI::CMyTabbedMDI()
 {
 }
 
+CMyTabbedMDI::~CMyTabbedMDI()
+{
+}
+
 //===========================================================================
 CWnd* CMyTabbedMDI::NewMDIChildFromID(int mdiChild)
 {

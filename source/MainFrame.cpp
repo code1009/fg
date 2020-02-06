@@ -33,217 +33,6 @@ CMainFrame::~CMainFrame()
 }
 
 //===========================================================================
-void CMainFrame::LoadDefaultDockers()
-{
-	CDocker* pDockTop   ;
-	CDocker* pDockRight ;
-	CDocker* pDockBottom;
-	CDocker* pDockLeft  ;
-
-
-	pDockTop   	= NULL;
-	pDockRight 	= NULL;
-	pDockBottom	= NULL;
-	pDockLeft  	= NULL;
-
-
-	// Note: The  DockIDs are used for saving/restoring the dockers state in the registry
-	DWORD style;
-
-	style = 0;//DS_CLIENTEDGE; // The style added to each docker
-
-	
-	// Add the parent dockers
-	pDockLeft = AddDockedChild(new CMyDocker (), DS_DOCKED_LEFT | style, 400, ID_DOCKER_MY );
-
-	// Add the remaining dockers
-	pDockLeft->AddDockedChild(new CEventMessageDocker (), DS_DOCKED_CONTAINER | style, 400, ID_DOCKER_EVENTMESSAGE );
-}
-
-void CMainFrame::LoadDefaultMDIs()
-{
-	m_MyTabbedMDI.GetTab().SetPadding(200,100);
-	
-	// Add some MDI tabs
-	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView") , ID_MDI_VIEW_MY );
-
-
-	if (m_MyTabbedMDI.IsWindow())
-	{
-		m_MyTabbedMDI.SetActiveMDITab(0);
-	}
-}
-
-//===========================================================================
-void CMainFrame::SetContainerTabsAtTop(BOOL atTop)
-{
-	m_isContainerTabsAtTop = atTop;
-
-
-	//-----------------------------------------------------------------------
-	std::vector<DockPtr>::const_iterator iter;
-
-	// Set the Tab position for each container
-	for (iter = GetAllDockChildren().begin(); iter < GetAllDockChildren().end(); ++iter)
-	{
-		CDockContainer* pContainer = (*iter)->GetContainer();
-		if (pContainer && pContainer->IsWindow())
-		{
-			pContainer->SetTabsAtTop(atTop);
-		}
-	}
-}
-
-void CMainFrame::HideSingleContainerTab(BOOL hideSingle)
-{
-	m_isHideSingleTab = hideSingle;
-
-
-	//-----------------------------------------------------------------------
-	std::vector<DockPtr>::const_iterator iter;
-
-	// Set the Tab position for each container
-	for (iter = GetAllDockChildren().begin(); iter < GetAllDockChildren().end(); ++iter)
-	{
-		CDockContainer* pContainer = (*iter)->GetContainer();
-		if (pContainer && pContainer->IsWindow())
-		{
-			pContainer->SetHideSingleTab(hideSingle);
-		}
-	}
-}
-
-void CMainFrame::SetMDITabsAtTop(BOOL atTop)
-{
-	m_isMDITabsAtTop = atTop;
-
-	
-	//-----------------------------------------------------------------------
-	m_MyTabbedMDI.GetTab().SetTabsAtTop(atTop);
-}
-
-
-//===========================================================================
-BOOL CMainFrame::OnDefaultLayout()
-{
-	SetRedraw(FALSE);
-
-    
-	CloseAllDockers();
-	m_MyTabbedMDI.CloseAllMDIChildren();
-    
-	
-	LoadDefaultDockers();
-	LoadDefaultMDIs();
-
-	SetContainerTabsAtTop (m_isContainerTabsAtTop);
-	HideSingleContainerTab(m_isHideSingleTab);
-	SetMDITabsAtTop       (m_isMDITabsAtTop);
-	
-
-	SetRedraw(TRUE);
-    
-
-	RedrawWindow();
-
-	return TRUE;
-}
-
-BOOL CMainFrame::OnCloseDockers()
-{
-	CloseAllDockers();
-	return TRUE;
-}
-
-BOOL CMainFrame::OnCloseMDIs()
-{
-	m_MyTabbedMDI.CloseAllMDIChildren();
-	return TRUE;
-}
-
-//===========================================================================
-BOOL CMainFrame::OnContainerTabsAtTop()
-// Reposition the tabs in the containers
-{
-	SetContainerTabsAtTop(!m_isContainerTabsAtTop);
-	return TRUE;
-}
-
-BOOL CMainFrame::OnHideSingleTab()
-{
-	HideSingleContainerTab(!m_isHideSingleTab);
-	return TRUE;
-}
-
-BOOL CMainFrame::OnMDITabsAtTop()
-// Reposition TabbedMDI's tabs
-{
-	SetMDITabsAtTop(!m_isMDITabsAtTop);
-	return TRUE;
-}
-
-//===========================================================================
-BOOL CMainFrame::OnFileExit()
-{
-	// Issue a close request to the frame
-	PostMessage(WM_CLOSE);
-	return TRUE;
-}
-
-BOOL CMainFrame::OnFileNew()
-{
-	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView") , ID_MDI_VIEW_MY );
-
-
-	if (m_MyTabbedMDI.IsWindow())
-	{
-		m_MyTabbedMDI.SetActiveMDITab(0);
-	}
-
-	fg::generate("");
-
-	return TRUE;
-}
-
-//===========================================================================
-CDocker* CMainFrame::NewDockerFromID(int dockID)
-{
-	CDocker* pDocker = NULL;
-
-
-	switch (dockID)
-	{
-	case ID_DOCKER_MY:
-		pDocker = new CMyDocker();
-		break;
-
-	default:
-		TRACE("Unknown Dock ID\n");
-		break;
-	}
-
-	return pDocker;
-}
-
-//===========================================================================
-BOOL CMainFrame::SaveRegistrySettings()
-{
-	#if 0
-	CDockFrame::SaveRegistrySettings();
-	#endif
-
-	#if 0
-	// Save the docker settings
-	SaveDockRegistrySettings(GetRegistryKeyName());
-
-	// Save the tabbedMDI settings
-	m_MyTabbedMDI.SaveRegistrySettings(GetRegistryKeyName());
-	#endif
-
-	return TRUE;
-}
-
-//===========================================================================
 void CMainFrame::PreCreate(CREATESTRUCT& cs)
 {
 	// Call the base class function first
@@ -253,90 +42,6 @@ void CMainFrame::PreCreate(CREATESTRUCT& cs)
 	cs.style &= ~WS_VISIBLE;
 
 	//	cs.dwExStyle |= WS_EX_CLIENTEDGE;
-}
-
-void CMainFrame::SetupMenuIcons()
-{
-	// Load the defualt set of icons from the toolbar
-	CDockFrame::SetupMenuIcons();
-
-	// Add some extra icons for menu items
-}
-
-void CMainFrame::SetupToolBar()
-{
-	// Set the Resource IDs for the toolbar buttons
-	AddToolBarButton( IDM_FILE_NEW   );
-	AddToolBarButton( IDM_FILE_OPEN,  FALSE );
-	AddToolBarButton( IDM_FILE_SAVE,  FALSE );
-
-	AddToolBarButton( 0 );  // Separator
-	AddToolBarButton( IDM_EDIT_CUT,   FALSE );
-	AddToolBarButton( IDM_EDIT_COPY,  FALSE );
-	AddToolBarButton( IDM_EDIT_PASTE, FALSE );
-
-	AddToolBarButton( 0 );  // Separator
-	AddToolBarButton( IDM_FILE_PRINT, FALSE );
-
-	AddToolBarButton( 0 );  // Separator
-	AddToolBarButton( IDM_HELP_ABOUT );
-
-//	SetToolBarImages(RGB(192,192,192), IDB_TOOLBAR_NORM, IDB_TOOLBAR_HOT, IDB_TOOLBAR_DIS);
-
-	/*
-	// Use larger buttons with seperate imagelists for normal, hot and disabled buttons.
-	SetToolBarImages(RGB(192,192,192), IDB_TOOLBAR_NORM, IDB_TOOLBAR_HOT, IDB_TOOLBAR_DIS);
-
-
-
-	// Configure the "New" toolbar button to bring up a menu
-	// Setting this style requires comctl32.dll version 4.72 or later
-	if (GetComCtlVersion() >= 472)
-	{
-		GetToolBar().SetButtonStyle(IDM_FILE_NEW, BTNS_WHOLEDROPDOWN);
-	}
-	*/
-}
-
-LRESULT CMainFrame::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
-{
-//	switch (msg)
-//	{
-//	
-//	}
-
-	// Always pass unhandled messages on to WndProcDefault
-	return WndProcDefault(msg, wparam, lparam);
-}
-
-//===========================================================================
-LRESULT CMainFrame::OnDockActivated(UINT msg, WPARAM wparam, LPARAM lparam)
-// Called when a docker is activated.
-// Store the active docker in preparation for menu input. Excludes active 
-// docker change for undocked dockers when using the menu.
-{
-	TRACE ("CMainFrame::OnDockActivated()\n");
-
-	CPoint pt = GetCursorPos();
-	if (WindowFromPoint(pt) != GetMenuBar())
-	{
-		m_pActiveDocker = GetActiveDocker();
-	}
-
-	return CDockFrame::OnDockActivated(msg, wparam, lparam);
-}
-
-LRESULT CMainFrame::OnDockDestroyed(UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	TRACE ("CMainFrame::OnDockDestroyed()\n");
-
-	CDocker* pDocker = reinterpret_cast<CDocker*>(wparam);
-
-	int id = pDocker->GetDockID();
-
-	//TRACE (_T("OnDockDestroyed() : id = %d"), id);
-
-	return CDockFrame::OnDockDestroyed(msg, wparam, lparam);
 }
 
 //===========================================================================
@@ -445,6 +150,221 @@ void CMainFrame::OnMenuUpdate(UINT id)
 	CDockFrame::OnMenuUpdate(id);
 }
 
+//===========================================================================
+void CMainFrame::SetupMenuIcons()
+{
+	// Load the defualt set of icons from the toolbar
+	CDockFrame::SetupMenuIcons();
+
+	// Add some extra icons for menu items
+}
+
+void CMainFrame::SetupToolBar()
+{
+	// Set the Resource IDs for the toolbar buttons
+	AddToolBarButton( IDM_FILE_NEW   );
+	AddToolBarButton( IDM_FILE_OPEN,  FALSE );
+	AddToolBarButton( IDM_FILE_SAVE,  FALSE );
+
+	AddToolBarButton( 0 );  // Separator
+	AddToolBarButton( IDM_EDIT_CUT,   FALSE );
+	AddToolBarButton( IDM_EDIT_COPY,  FALSE );
+	AddToolBarButton( IDM_EDIT_PASTE, FALSE );
+
+	AddToolBarButton( 0 );  // Separator
+	AddToolBarButton( IDM_FILE_PRINT, FALSE );
+
+	AddToolBarButton( 0 );  // Separator
+	AddToolBarButton( IDM_HELP_ABOUT );
+
+//	SetToolBarImages(RGB(192,192,192), IDB_TOOLBAR_NORM, IDB_TOOLBAR_HOT, IDB_TOOLBAR_DIS);
+
+	/*
+	// Use larger buttons with seperate imagelists for normal, hot and disabled buttons.
+	SetToolBarImages(RGB(192,192,192), IDB_TOOLBAR_NORM, IDB_TOOLBAR_HOT, IDB_TOOLBAR_DIS);
+
+
+
+	// Configure the "New" toolbar button to bring up a menu
+	// Setting this style requires comctl32.dll version 4.72 or later
+	if (GetComCtlVersion() >= 472)
+	{
+		GetToolBar().SetButtonStyle(IDM_FILE_NEW, BTNS_WHOLEDROPDOWN);
+	}
+	*/
+}
+
+//===========================================================================
+CDocker* CMainFrame::NewDockerFromID(int dockID)
+{
+	CDocker* pDocker = NULL;
+
+
+	switch (dockID)
+	{
+	case ID_DOCKER_MY:
+		pDocker = new CMyDocker();
+		break;
+
+	default:
+		TRACE("Unknown Dock ID\n");
+		break;
+	}
+
+	return pDocker;
+}
+
+//===========================================================================
+BOOL CMainFrame::SaveRegistrySettings()
+{
+	#if 0
+	CDockFrame::SaveRegistrySettings();
+	#endif
+
+	#if 0
+	// Save the docker settings
+	SaveDockRegistrySettings(GetRegistryKeyName());
+
+	// Save the tabbedMDI settings
+	m_MyTabbedMDI.SaveRegistrySettings(GetRegistryKeyName());
+	#endif
+
+	return TRUE;
+}
+
+//===========================================================================
+LRESULT CMainFrame::OnDockActivated(UINT msg, WPARAM wparam, LPARAM lparam)
+// Called when a docker is activated.
+// Store the active docker in preparation for menu input. Excludes active 
+// docker change for undocked dockers when using the menu.
+{
+	TRACE ("CMainFrame::OnDockActivated()\n");
+
+	CPoint pt = GetCursorPos();
+	if (WindowFromPoint(pt) != GetMenuBar())
+	{
+		m_pActiveDocker = GetActiveDocker();
+	}
+
+	return CDockFrame::OnDockActivated(msg, wparam, lparam);
+}
+
+LRESULT CMainFrame::OnDockDestroyed(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	TRACE ("CMainFrame::OnDockDestroyed()\n");
+
+	CDocker* pDocker = reinterpret_cast<CDocker*>(wparam);
+
+	int id = pDocker->GetDockID();
+
+	//TRACE (_T("OnDockDestroyed() : id = %d"), id);
+
+	return CDockFrame::OnDockDestroyed(msg, wparam, lparam);
+}
+
+//===========================================================================
+void CMainFrame::LoadDefaultDockers()
+{
+	CDocker* pDockTop   ;
+	CDocker* pDockRight ;
+	CDocker* pDockBottom;
+	CDocker* pDockLeft  ;
+
+
+	pDockTop   	= NULL;
+	pDockRight 	= NULL;
+	pDockBottom	= NULL;
+	pDockLeft  	= NULL;
+
+
+	// Note: The  DockIDs are used for saving/restoring the dockers state in the registry
+	DWORD style;
+
+	style = 0;//DS_CLIENTEDGE; // The style added to each docker
+
+	
+	// Add the parent dockers
+	pDockLeft = AddDockedChild(new CMyDocker (), DS_DOCKED_LEFT | style, 400, ID_DOCKER_MY );
+
+	// Add the remaining dockers
+	pDockLeft->AddDockedChild(new CEventMessageDocker (), DS_DOCKED_CONTAINER | style, 400, ID_DOCKER_EVENTMESSAGE );
+}
+
+void CMainFrame::LoadDefaultMDIs()
+{
+	m_MyTabbedMDI.GetTab().SetPadding(200,100);
+	
+	// Add some MDI tabs
+	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView") , ID_MDI_VIEW_MY );
+
+
+	if (m_MyTabbedMDI.IsWindow())
+	{
+		m_MyTabbedMDI.SetActiveMDITab(0);
+	}
+}
+
+//===========================================================================
+void CMainFrame::SetContainerTabsAtTop(BOOL atTop)
+{
+	m_isContainerTabsAtTop = atTop;
+
+
+	//-----------------------------------------------------------------------
+	std::vector<DockPtr>::const_iterator iter;
+
+	// Set the Tab position for each container
+	for (iter = GetAllDockChildren().begin(); iter < GetAllDockChildren().end(); ++iter)
+	{
+		CDockContainer* pContainer = (*iter)->GetContainer();
+		if (pContainer && pContainer->IsWindow())
+		{
+			pContainer->SetTabsAtTop(atTop);
+		}
+	}
+}
+
+void CMainFrame::HideSingleContainerTab(BOOL hideSingle)
+{
+	m_isHideSingleTab = hideSingle;
+
+
+	//-----------------------------------------------------------------------
+	std::vector<DockPtr>::const_iterator iter;
+
+	// Set the Tab position for each container
+	for (iter = GetAllDockChildren().begin(); iter < GetAllDockChildren().end(); ++iter)
+	{
+		CDockContainer* pContainer = (*iter)->GetContainer();
+		if (pContainer && pContainer->IsWindow())
+		{
+			pContainer->SetHideSingleTab(hideSingle);
+		}
+	}
+}
+
+void CMainFrame::SetMDITabsAtTop(BOOL atTop)
+{
+	m_isMDITabsAtTop = atTop;
+
+	
+	//-----------------------------------------------------------------------
+	m_MyTabbedMDI.GetTab().SetTabsAtTop(atTop);
+}
+
+//===========================================================================
+LRESULT CMainFrame::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+//	switch (msg)
+//	{
+//	
+//	}
+
+	// Always pass unhandled messages on to WndProcDefault
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+//===========================================================================
 BOOL CMainFrame::OnCommand(WPARAM wparam, LPARAM lparam)
 {
 	// OnCommand responds to menu and and toolbar input
@@ -498,4 +418,84 @@ BOOL CMainFrame::OnCommand(WPARAM wparam, LPARAM lparam)
 	return FALSE;
 }
 
+//===========================================================================
+BOOL CMainFrame::OnDefaultLayout()
+{
+	SetRedraw(FALSE);
 
+    
+	CloseAllDockers();
+	m_MyTabbedMDI.CloseAllMDIChildren();
+    
+	
+	LoadDefaultDockers();
+	LoadDefaultMDIs();
+
+	SetContainerTabsAtTop (m_isContainerTabsAtTop);
+	HideSingleContainerTab(m_isHideSingleTab);
+	SetMDITabsAtTop       (m_isMDITabsAtTop);
+	
+
+	SetRedraw(TRUE);
+    
+
+	RedrawWindow();
+
+	return TRUE;
+}
+
+BOOL CMainFrame::OnCloseDockers()
+{
+	CloseAllDockers();
+	return TRUE;
+}
+
+BOOL CMainFrame::OnCloseMDIs()
+{
+	m_MyTabbedMDI.CloseAllMDIChildren();
+	return TRUE;
+}
+
+//===========================================================================
+BOOL CMainFrame::OnContainerTabsAtTop()
+// Reposition the tabs in the containers
+{
+	SetContainerTabsAtTop(!m_isContainerTabsAtTop);
+	return TRUE;
+}
+
+BOOL CMainFrame::OnHideSingleTab()
+{
+	HideSingleContainerTab(!m_isHideSingleTab);
+	return TRUE;
+}
+
+BOOL CMainFrame::OnMDITabsAtTop()
+// Reposition TabbedMDI's tabs
+{
+	SetMDITabsAtTop(!m_isMDITabsAtTop);
+	return TRUE;
+}
+
+//===========================================================================
+BOOL CMainFrame::OnFileExit()
+{
+	// Issue a close request to the frame
+	PostMessage(WM_CLOSE);
+	return TRUE;
+}
+
+BOOL CMainFrame::OnFileNew()
+{
+	m_MyTabbedMDI.AddMDIChild(new CMyView() , _T("MyView") , ID_MDI_VIEW_MY );
+
+
+	if (m_MyTabbedMDI.IsWindow())
+	{
+		m_MyTabbedMDI.SetActiveMDITab(0);
+	}
+
+	fg::generate("");
+
+	return TRUE;
+}
