@@ -82,7 +82,7 @@ void CXListViewInplaceEdit::OnAttach()
 
 	SetWindowText( m_Text.c_str() );
 	SetFocus();
-	SetSel( -1, TRUE );
+	SetSel( 0, -1, TRUE );
 }
 
 void CXListViewInplaceEdit::OnDestroy()
@@ -437,6 +437,13 @@ void CXListView::OnDestroy()
 void CXListView::OnAttach()
 {
 	//-----------------------------------------------------------------------
+	m_Font.CreatePointFont (120, _T("맑은 고딕"));
+
+	
+	SetFont(m_Font);
+
+
+	//-----------------------------------------------------------------------
 	DWORD dwStyle;
 	DWORD dwExtendedStyle;
 
@@ -507,6 +514,30 @@ void CXListView::OnAttach()
 	LvColumn.cchTextMax= 1024*3; // GetItem올때 가져올수있는 크기 (시하는 텍스트는 259+1[MAX_PATH]널문자로 제한됨)
 	LvColumn.iSubItem  = 3;
 	InsertColumn(3, LvColumn);
+
+
+	//--------------------------------------------------------------------------
+	int x;
+	int y;
+
+
+	for (y=0; y<100; y++)
+	{
+		std::vector<std::string> c;
+
+
+		for (x=0; x<4; x++)
+		{
+			std::stringstream ss;
+
+
+			ss << x << _T(":") << y;
+
+			c.push_back(ss.str());
+		}
+
+		m_TestContainer.push_back(c);
+	}
 
 
 	//--------------------------------------------------------------------------
@@ -763,6 +794,10 @@ LRESULT CXListView::InplaceEdit_OnUpdate (UINT msg, WPARAM wparam, LPARAM lparam
 	ok = wparam;
 	e = (CXListViewInplaceEdit*)lparam;
 
+	if (ok)
+	{
+		m_TestContainer[e->m_Item][e->m_Column] = e->m_Text;
+	}
 
 	CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Update=%d", e, ok);
 	return 0;
@@ -920,7 +955,8 @@ void CXListView::InplaceEdit_New( int item, int column )
 	pEdit = new CXListViewInplaceEdit(
 		this,
 		item, column, 
-		std::string("text")
+		m_TestContainer[item][column]
+//		std::string("text")
 		);
 
 
@@ -1212,6 +1248,8 @@ void CXListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect cell_rect;
 	int   n;
 
+	std::string text;
+
 
 	for (n=0; n<column_count; n++)
 	{
@@ -1246,12 +1284,17 @@ void CXListView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 
 		//-------------------------------------------------------------------
-		text_format = DT_CENTER | DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE;
+		text_format = /*DT_CENTER |*/ DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE;
 
 
 		//-------------------------------------------------------------------
 		::SetTextColor(dc, text_color);
-		::DrawText    (dc, ss.str().c_str(), ss.str().size(), cell_rect, text_format);
+		
+		cell_rect.DeflateRect(4,2,0,2);
+//		::DrawText    (dc, ss.str().c_str(), ss.str().size(), cell_rect, text_format);
+		
+		text = m_TestContainer[item_id][n];
+		::DrawText    (dc, text.c_str(), text.size(), cell_rect, text_format);
 	}
 
 

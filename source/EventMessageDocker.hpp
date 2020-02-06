@@ -60,6 +60,10 @@ private:
 	CImageList                          m_SmallImageList;
 	std::vector<CXListViewInplaceEdit*> m_InplaceEditContainer;
 
+	std::vector < std::vector<std::string> > m_TestContainer;
+
+	CFont m_Font;
+
 public:
 	CXListView();
 	virtual ~CXListView();
