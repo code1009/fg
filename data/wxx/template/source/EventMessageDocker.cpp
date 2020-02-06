@@ -520,6 +520,7 @@ LRESULT CXListView::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_MOUSEACTIVATE: return OnMouseActivate(msg, wparam, lparam);
 	case WM_LBUTTONDOWN  : return OnLButtonDown  (msg, wparam, lparam);
+	case WM_LBUTTONDBLCLK: return OnLButtonDbClk (msg, wparam, lparam);
 	case WM_MOUSEWHEEL   : return OnMouseWheel   (msg, wparam, lparam); 
 	case WM_HSCROLL      : return OnHScroll      (msg, wparam, lparam);
 	case WM_VSCROLL      : return OnVScroll      (msg, wparam, lparam);
@@ -586,6 +587,50 @@ LRESULT CXListView::OnLButtonDown(UINT msg, WPARAM wparam, LPARAM lparam)
 		else
 		{
 //			SetItemState(item, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED); 
+		}
+	}
+
+
+	//-----------------------------------------------------------------------
+	return WndProcDefault(msg, wparam, lparam);
+}
+
+LRESULT CXListView::OnLButtonDbClk(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	CPoint ptMouse((short)LOWORD(lparam), (short)HIWORD(lparam));
+	UINT   uMouseFlag = wparam;
+	WORD   fwKeys     = LOWORD(wparam);
+	SHORT  zDelta     = HIWORD(wparam);
+
+
+	//-----------------------------------------------------------------------
+	int item;
+	int column;
+
+	int result;
+	LVHITTESTINFO hti;
+	UINT flag = LVIS_FOCUSED;
+
+
+	ZeroMemory(&hti, sizeof(hti));
+	hti.flags = 0u;
+	hti.pt    = ptMouse;
+	result    = HitTest(hti);
+	item      = hti.iItem;
+
+	ZeroMemory(&hti, sizeof(hti));
+	hti.flags = 0u;
+	hti.pt    = ptMouse;
+	result    = SubItemHitTest(hti);   
+	column    = hti.iSubItem;
+
+
+	if (0<=item && 0<=column)
+	{
+		if ( m_InplaceEditContainer.empty() )
+		{
+			InplaceEdit_New( item, column );
+			return 0;
 		}
 	}
 

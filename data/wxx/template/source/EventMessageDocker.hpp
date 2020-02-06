@@ -75,6 +75,7 @@ public:
 public:
 	LRESULT OnMouseActivate(UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnLButtonDown  (UINT msg, WPARAM wparam, LPARAM lparam);
+	LRESULT OnLButtonDbClk (UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnHScroll      (UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnVScroll      (UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnMouseWheel   (UINT msg, WPARAM wparam, LPARAM lparam);
