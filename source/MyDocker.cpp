@@ -63,18 +63,21 @@ LRESULT CMyDockerWnd::OnSize(UINT msg, WPARAM wparam, LPARAM lparam)
 	// If not minimized, save the window size
 	if (wparam != SIZE_MINIMIZED)
 	{
-		m_cxClientMax = LOWORD (lparam) ;
+		m_cxClientMax = LOWORD(lparam);
 		if (m_cxClientMax < 1)
 			m_cxClientMax = 1;
 
-		m_cyClientMax = HIWORD (lparam) ;
+		m_cyClientMax = HIWORD(lparam);
 		if (m_cyClientMax < 1)
 			m_cyClientMax = 1;
 	}
 
-	Invalidate();
+	if ( IsWindow() )
+	{
+		Invalidate(FALSE);
+	}
 
-	return 0;
+	return WndProcDefault(msg, wparam, lparam);
 }
 
 LRESULT CMyDockerWnd::OnTimer(UINT msg, WPARAM wparam, LPARAM lparam)

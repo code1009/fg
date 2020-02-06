@@ -71,7 +71,12 @@ LRESULT CMyView::OnSize(UINT msg, WPARAM wparam, LPARAM lparam)
 			m_cyClientMax = 1;
 	}
 
-	return 0;
+	if ( IsWindow() )
+	{
+		Invalidate(FALSE);
+	}
+
+	return WndProcDefault(msg, wparam, lparam);
 }
 
 LRESULT CMyView::OnTimer(UINT msg, WPARAM wparam, LPARAM lparam)

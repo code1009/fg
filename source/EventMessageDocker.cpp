@@ -205,10 +205,27 @@ LRESULT CXListViewInplaceEdit::OnKeyDown(UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		break;
 
-	case VK_TAB:
 	case VK_UP:
-	case VK_DOWN:
 		{
+			if (0==m_Item)
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
+			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
+			::SetFocus(GetParent());
+			return 0;
+		}
+		break;
+
+	case VK_DOWN:
+	case VK_TAB:
+		{
+			if ((m_Item+1)>=m_ListView->GetItemCount())
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
 			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
 			::SetFocus(GetParent());
 			return 0;
@@ -223,6 +240,13 @@ LRESULT CXListViewInplaceEdit::OnKeyDown(UINT msg, WPARAM wparam, LPARAM lparam)
 				return WndProcDefault(msg, wparam, lparam);
 			}
 
+
+			if (0==m_Column)
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
+
 			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
 			::SetFocus(GetParent());
 			return 0;
@@ -236,6 +260,21 @@ LRESULT CXListViewInplaceEdit::OnKeyDown(UINT msg, WPARAM wparam, LPARAM lparam)
 			{
 				return WndProcDefault(msg, wparam, lparam);
 			}
+
+
+			CHeader header;
+			int column_count;
+
+
+			header.Attach(m_ListView->GetHeader());
+			column_count = header.GetItemCount();
+			header.Detach();
+
+			if( (m_Column+1) >= column_count )
+			{
+				return WndProcDefault(msg, wparam, lparam);
+			}
+
 
 			GetParent().PostMessage(nm_msg, nm_wparam, nm_lparam);
 			::SetFocus(GetParent());
@@ -727,10 +766,10 @@ LRESULT CXListView::InplaceEdit_OnNavigate (UINT msg, WPARAM wparam, LPARAM lpar
 	return 0;
 }
 
-void CXListView::InplaceEdit_New( int nItem, int nCol )
+void CXListView::InplaceEdit_New( int item, int column )
 {
 	//-----------------------------------------------------------------------
-	if( !EnsureVisible( nItem, TRUE ) )
+	if( !EnsureVisible( item, TRUE ) )
 	{
 		return;
 	}
@@ -746,7 +785,7 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 	column_count = header.GetItemCount();
 	header.Detach();
 
-	if( nCol >= column_count || GetColumnWidth(nCol) < 5 )
+	if( column >= column_count || GetColumnWidth(column) < 10 )
 	{
 		return;
 	}
@@ -759,7 +798,7 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 
 
 	offset = 0;
-	for(i = 0; i < nCol; i++ )
+	for(i = 0; i < column; i++ )
 	{
 		offset += GetColumnWidth( i );
 	}
@@ -769,7 +808,7 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 	CRect rect;
 
 
-	GetItemRect( nItem, rect, LVIR_BOUNDS );
+	GetItemRect( item, rect, LVIR_BOUNDS );
  
 
 	//-----------------------------------------------------------------------
@@ -794,19 +833,19 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 
 	//-----------------------------------------------------------------------
 	// Get Column alignment
-	LV_COLUMN column;
+	LV_COLUMN lvcolumn;
 	
 	
-	column.mask = LVCF_FMT;
-	GetColumn( nCol, column );
+	lvcolumn.mask = LVCF_FMT;
+	GetColumn( column, lvcolumn );
 
 
 	//-----------------------------------------------------------------------
 	DWORD dwStyle;
 
 
-	if     ((column.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_LEFT ) { dwStyle = ES_LEFT  ; }
-	else if((column.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_RIGHT) { dwStyle = ES_RIGHT ; }
+	if     ((lvcolumn.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_LEFT ) { dwStyle = ES_LEFT  ; }
+	else if((lvcolumn.fmt&LVCFMT_JUSTIFYMASK) == LVCFMT_RIGHT) { dwStyle = ES_RIGHT ; }
 	else                                                     { dwStyle = ES_CENTER; }
 
 	dwStyle |= WS_VISIBLE|WS_CHILD|WS_BORDER|ES_AUTOHSCROLL;
@@ -814,10 +853,10 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 
 	//-----------------------------------------------------------------------
 //	rect.left += offset+4;
-//	rect.right = rect.left + GetColumnWidth( nCol ) - 3 ;
+//	rect.right = rect.left + GetColumnWidth( column ) - 3 ;
 
 	rect.left += offset;
-	rect.right = rect.left + GetColumnWidth( nCol ) + 1;
+	rect.right = rect.left + GetColumnWidth( column ) + 1;
 
 	rect.left++;
 	rect.bottom--;
@@ -835,7 +874,7 @@ void CXListView::InplaceEdit_New( int nItem, int nCol )
 
 	pEdit = new CXListViewInplaceEdit(
 		this,
-		nItem, nCol, 
+		item, column, 
 		std::string("text")
 		);
 
