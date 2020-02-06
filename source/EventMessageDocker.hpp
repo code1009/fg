@@ -78,8 +78,11 @@ public:
 	LRESULT OnHScroll      (UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnVScroll      (UINT msg, WPARAM wparam, LPARAM lparam);
 	LRESULT OnMouseWheel   (UINT msg, WPARAM wparam, LPARAM lparam);
-	
-	void NewInplaceEdit (int nItem, int nCol);
+
+	LRESULT InplaceEdit_OnDelete   (UINT msg, WPARAM wparam, LPARAM lparam);
+	LRESULT InplaceEdit_OnUpdate   (UINT msg, WPARAM wparam, LPARAM lparam);
+	LRESULT InplaceEdit_OnNavigate (UINT msg, WPARAM wparam, LPARAM lparam);
+	void    InplaceEdit_New        (int item, int column);
 
 public:
 	LRESULT OnLvnGetDispInfo   (WPARAM wparam, LPARAM lparam);

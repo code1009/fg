@@ -238,7 +238,7 @@ LRESULT CMainFrame::OnDockActivated(UINT msg, WPARAM wparam, LPARAM lparam)
 // Store the active docker in preparation for menu input. Excludes active 
 // docker change for undocked dockers when using the menu.
 {
-	TRACE ("CMainFrame::OnDockActivated()\n");
+//	TRACE ("CMainFrame::OnDockActivated()\n");
 
 	CPoint pt = GetCursorPos();
 	if (WindowFromPoint(pt) != GetMenuBar())

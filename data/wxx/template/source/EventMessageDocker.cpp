@@ -485,82 +485,9 @@ LRESULT CXListView::WndProc(UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_HSCROLL      : return OnHScroll      (msg, wparam, lparam);
 	case WM_VSCROLL      : return OnVScroll      (msg, wparam, lparam);
 
-	case WM_USER+20:
-		{
-			CXListViewInplaceEdit* e;
-
-
-			e = (CXListViewInplaceEdit*)lparam;
-
-
-			std::vector<CXListViewInplaceEdit*>::iterator i;
-
-
-			i = std::find(m_InplaceEditContainer.begin(), m_InplaceEditContainer.end(), e);
-			if (i!=m_InplaceEditContainer.end())
-			{
-				m_InplaceEditContainer.erase(i);
-			}
-
-
-			delete e;
-
-
-			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Delete", e);
-			return 0;
-		}
-		break;
-
-	case WM_USER+21:
-		{
-			CXListViewInplaceEdit* e;
-			UINT ok;
-
-			ok = wparam;
-			e = (CXListViewInplaceEdit*)lparam;
-
-
-			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Update=%d", e, ok);
-		}
-		break;
-
-	case WM_USER+22:
-		{
-			CXListViewInplaceEdit* e;
-			UINT vkey;
-
-			vkey = wparam;
-			e = (CXListViewInplaceEdit*)lparam;
-
-			switch (vkey)
-			{
-			case VK_TAB:
-				NewInplaceEdit(e->m_Item+1, e->m_Column);
-				break;
-
-			case VK_UP:
-				NewInplaceEdit(e->m_Item-1, e->m_Column);
-				break;
-
-			case VK_DOWN:
-				NewInplaceEdit(e->m_Item+1, e->m_Column);
-				break;
-
-			case VK_LEFT:
-				NewInplaceEdit(e->m_Item, e->m_Column-1);
-				break;
-
-			case VK_RIGHT:
-				NewInplaceEdit(e->m_Item, e->m_Column+1);
-				break;
-
-			default:
-				break;
-			}
-
-			CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Navigation %d", e, vkey);
-		}
-		break;
+	case WM_USER+20: return InplaceEdit_OnDelete  (msg, wparam, lparam);
+	case WM_USER+21: return InplaceEdit_OnUpdate  (msg, wparam, lparam);
+	case WM_USER+22: return InplaceEdit_OnNavigate(msg, wparam, lparam);
 
 	default:
 		break;
@@ -584,31 +511,43 @@ LRESULT CXListView::OnLButtonDown(UINT msg, WPARAM wparam, LPARAM lparam)
 
 
 	//-----------------------------------------------------------------------
-	int row;
-	int col;
+	int item;
+	int column;
 
 	int result;
 	LVHITTESTINFO hti;
+	UINT flag = LVIS_FOCUSED;
 
 
 	ZeroMemory(&hti, sizeof(hti));
 	hti.flags = 0u;
 	hti.pt    = ptMouse;
 	result    = HitTest(hti);
-	row       = hti.iItem;
+	item      = hti.iItem;
 
 	ZeroMemory(&hti, sizeof(hti));
 	hti.flags = 0u;
 	hti.pt    = ptMouse;
 	result    = SubItemHitTest(hti);   
-	col       = hti.iSubItem;
+	column    = hti.iSubItem;
 
 
-	if (0<=row && 0<=col)
+	if (0<=item && 0<=column)
 	{
-		NewInplaceEdit( row, col );
+		if( flag==(GetItemState(item, flag ) & flag) )
+		{
+			//if( GetWindowLong(GWL_STYLE) & LVS_EDITLABELS )
 
-		return 0;
+			if ( m_InplaceEditContainer.empty() )
+			{
+				InplaceEdit_New( item, column );
+				return 0;
+			}
+		}
+		else
+		{
+//			SetItemState(item, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED); 
+		}
 	}
 
 
@@ -703,7 +642,92 @@ LRESULT CXListView::OnMouseWheel (UINT msg, WPARAM wparam, LPARAM lparam)
 	return WndProcDefault(msg, wparam, lparam);
 }
 
-void CXListView::NewInplaceEdit( int nItem, int nCol )
+LRESULT CXListView::InplaceEdit_OnDelete (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//-----------------------------------------------------------------------
+	CXListViewInplaceEdit* e;
+
+
+	e = (CXListViewInplaceEdit*)lparam;
+
+
+	//-----------------------------------------------------------------------
+	std::vector<CXListViewInplaceEdit*>::iterator i;
+
+
+	i = std::find(m_InplaceEditContainer.begin(), m_InplaceEditContainer.end(), e);
+	if (i!=m_InplaceEditContainer.end())
+	{
+		m_InplaceEditContainer.erase(i);
+	}
+
+
+	delete e;
+
+
+	CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Delete", e);
+	return 0;
+}
+
+LRESULT CXListView::InplaceEdit_OnUpdate (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//-----------------------------------------------------------------------
+	CXListViewInplaceEdit* e;
+	UINT ok;
+
+
+	ok = wparam;
+	e = (CXListViewInplaceEdit*)lparam;
+
+
+	CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x): Update=%d", e, ok);
+	return 0;
+}
+
+LRESULT CXListView::InplaceEdit_OnNavigate (UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//-----------------------------------------------------------------------
+	CXListViewInplaceEdit* e;
+	UINT vkey;
+
+
+	vkey = wparam;
+	e = (CXListViewInplaceEdit*)lparam;
+
+
+	//-----------------------------------------------------------------------
+	switch (vkey)
+	{
+	case VK_TAB:
+		InplaceEdit_New(e->m_Item+1, e->m_Column);
+		break;
+
+	case VK_UP:
+		InplaceEdit_New(e->m_Item-1, e->m_Column);
+		break;
+
+	case VK_DOWN:
+		InplaceEdit_New(e->m_Item+1, e->m_Column);
+		break;
+
+	case VK_LEFT:
+		InplaceEdit_New(e->m_Item, e->m_Column-1);
+		break;
+
+	case VK_RIGHT:
+		InplaceEdit_New(e->m_Item, e->m_Column+1);
+		break;
+
+	default:
+		break;
+	}
+
+
+	CX_DEBUG_TRACEF(CX_TWA_NORMAL, "Edit(%x)_Navigate: key=%d", e, vkey);
+	return 0;
+}
+
+void CXListView::InplaceEdit_New( int nItem, int nCol )
 {
 	//-----------------------------------------------------------------------
 	if( !EnsureVisible( nItem, TRUE ) )
