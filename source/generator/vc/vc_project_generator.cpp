@@ -792,7 +792,7 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_Link (vc_project_confi
 
 	if (e->_debug)
 	{
-		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx3/build_msvc2013_static_library/Debug;D:/Development/SDK/cxLibrary/Visual Leak Detector/2.5.1/lib/Win32";
+		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx/build_msvc2013_static_library/Debug;D:/Development/SDK/cxLibrary/Visual Leak Detector/2.5.1/lib/Win32";
 
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("SubSystem"                    , "Windows" );
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("GenerateDebugInformation"     , "true"    );
@@ -800,7 +800,7 @@ void vc_project_generator::TAG_ItemDefinitionGroup_SUBTAG_Link (vc_project_confi
 	}
 	else
 	{
-		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx3/build_msvc2013_static_library/Release";
+		AdditionalLibraryDirectories = "D:/Development/SDK/cxLibrary/cx/build_msvc2013_static_library/Release";
 
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("SubSystem"                    , "Windows");
 		TAG_ItemDefinitionGroup_SUBTAG_XXX_SUBTAG("GenerateDebugInformation"     , "true"   );

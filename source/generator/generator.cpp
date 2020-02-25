@@ -72,7 +72,7 @@ cx::bool_t generate(std::string type)
 	p.set_environment("$fg_directory"            , my_directory); 
 	p.set_environment("$fg_type"                 , "wxx"); 
 	p.set_environment("$fg_target_root_directory", "D:/Development/Project/test/"); 
-	p.set_environment("$fg_name"                 , "fg"); 
+	p.set_environment("$fg_name"                 , "rs_it_editor"); 
 
 
 	//-----------------------------------------------------------------------

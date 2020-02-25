@@ -59,7 +59,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>D:\Development\SDK\cxLibrary\cx3\build_msvc2013_static_library\Debug;D:\Development\SDK\cxLibrary\Visual Leak Detector\2.5.1\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Development\SDK\cxLibrary\cx\build_msvc2013_static_library\Debug;D:\Development\SDK\cxLibrary\Visual Leak Detector\2.5.1\lib\Win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,7 +79,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>D:\Development\SDK\cxLibrary\cx3\build_msvc2013_static_library\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Development\SDK\cxLibrary\cx\build_msvc2013_static_library\Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

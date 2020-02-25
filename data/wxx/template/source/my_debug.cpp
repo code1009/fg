@@ -26,12 +26,12 @@
 #include <algorithm>
 
 //===========================================================================
-#include <cx3/library/header.hpp>
-#include <cx3/library/datetime/header.hpp>
-#include <cx3/library/platform/header.hpp>
-#include <cx3/library/filesystem/header.hpp>
-#include <cx3/library/filesystem/file_path.hpp>
-#include <cx3/library/log/header.hpp>
+#include <cx/library/header.hpp>
+#include <cx/library/datetime/header.hpp>
+#include <cx/library/platform/header.hpp>
+#include <cx/library/filesystem/header.hpp>
+#include <cx/library/filesystem/file_path.hpp>
+#include <cx/library/log/header.hpp>
 
 #include "my_debug.hpp"
 

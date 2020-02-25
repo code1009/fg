@@ -8,11 +8,11 @@
 #include <sstream>
 #include <iomanip>
 
-#include <cx3/library/header.hpp>
-#include <cx3/library/system/header.hpp>
-#include <cx3/library/string/header.hpp>
-#include <cx3/library/filesystem/header.hpp>
-#include <cx3/library/string/windows_charset_converter.hpp>
+#include <cx/library/header.hpp>
+#include <cx/library/system/header.hpp>
+#include <cx/library/string/header.hpp>
+#include <cx/library/filesystem/header.hpp>
+#include <cx/library/string/windows_charset_converter.hpp>
 
 #include "delete_pointer.hpp"
 
